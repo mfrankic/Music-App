@@ -1,7 +1,9 @@
 package com.example.musicapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,6 +18,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent goToLogin = new Intent(this, LoginActivity.class);
+        Button loginBtn = findViewById(R.id.goToLogin);
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
@@ -45,7 +49,12 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Settings button clicked");
         });
 
-
+        loginBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(goToLogin);
+            }
+        });
     }
 
     public void onNotificationButtonClick(View view) {
