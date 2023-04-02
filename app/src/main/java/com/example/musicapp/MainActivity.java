@@ -2,24 +2,32 @@ package com.example.musicapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent goToLogin = new Intent(this, LoginActivity.class);
-        Button loginBtn = findViewById(R.id.goToLogin);
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser == null) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
+
+        Button logoutBtn = findViewById(R.id.logout);
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
@@ -49,21 +57,15 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Settings button clicked");
         });
 
-        loginBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(goToLogin);
-            }
+        logoutBtn.setOnClickListener((view) -> {
+            auth.signOut();
+            updateUI();
         });
     }
 
-    public void onNotificationButtonClick(View view) {
-        // handle notification button click
-        System.out.println("Notification button clicked");
+    private void updateUI() {
+        finish();
+        startActivity(getIntent());
     }
 
-    public void onSettingsButtonClick(View view) {
-        // handle settings button click
-        System.out.println("Settings button clicked");
-    }
 }
