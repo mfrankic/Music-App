@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -20,6 +21,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private FirebaseUser currentUser;
     private EditText emailEditText, passwordEditText;
+
 
     View.OnClickListener loginBtnListener = new View.OnClickListener() {
         @Override
@@ -36,9 +38,15 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("LOGIN", "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                            updateUI();
+                            String errorMessage = task.getException().toString();
+                            String[] lines = errorMessage.split("\n");
+                            String firstLine = lines[0];
+                            String[] parts = firstLine.split(":");
+                            String error = parts.length > 1 ? parts[1].trim() : firstLine;
+
+                            Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG).show();
+
+                            //dupdateUI();
                         }
                     });
         }
@@ -53,7 +61,8 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             startActivity(goToRegisterActivity);
-            finish();
+            // Just so that back from register activity works :)
+            //finish();
         }
     };
 
