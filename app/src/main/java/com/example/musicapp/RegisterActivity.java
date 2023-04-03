@@ -35,18 +35,27 @@ public class RegisterActivity extends AppCompatActivity {
                                 // Sign in success, update UI with the signed-in user's information
                                 Log.d("LOGIN", "createUserWithEmail:success");
                                 currentUser = auth.getCurrentUser();
+                                Toast.makeText(RegisterActivity.this, "Account created", Toast.LENGTH_LONG).show();
                                 updateUI();
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w("LOGIN", "createUserWithEmail:failure", task.getException());
-                                Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                                updateUI();
+
+                                String errorMessage = task.getException().toString();
+                                String[] lines = errorMessage.split("\n");
+                                String firstLine = lines[0];
+                                String[] parts = firstLine.split(":");
+                                String error = parts.length > 1 ? parts[1].trim() : firstLine;
+
+                                Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG).show();
+                                //Log.d("LOGINexep", task.getException().toString());
+                                //updateUI();
                             }
                         });
             }
             // If they dont match
             else{
-                Toast.makeText(RegisterActivity.this, "Passwords don't match", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), "Passwords don't match", Toast.LENGTH_SHORT).show();
             }
 
 
