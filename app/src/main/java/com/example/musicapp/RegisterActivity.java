@@ -16,7 +16,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth auth = FirebaseAuth.getInstance();
-    private EditText emailEditText, passwordEditText;
+    private EditText emailEditText, passwordEditText, confirmPasswordEditText;
     private FirebaseUser currentUser;
 
     View.OnClickListener registerBtnListener = new View.OnClickListener() {
@@ -25,21 +25,32 @@ public class RegisterActivity extends AppCompatActivity {
 
             String email = emailEditText.getText().toString();
             String password = passwordEditText.getText().toString();
+            String passwordConfirm = confirmPasswordEditText.getText().toString();
 
-            auth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(RegisterActivity.this, task -> {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d("LOGIN", "createUserWithEmail:success");
-                            currentUser = auth.getCurrentUser();
-                            updateUI();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w("LOGIN", "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                            updateUI();
-                        }
-                    });
+            // Check if passwords match
+            if (password.equals(passwordConfirm)){
+                auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(RegisterActivity.this, task -> {
+                            if (task.isSuccessful()) {
+                                // Sign in success, update UI with the signed-in user's information
+                                Log.d("LOGIN", "createUserWithEmail:success");
+                                currentUser = auth.getCurrentUser();
+                                updateUI();
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                Log.w("LOGIN", "createUserWithEmail:failure", task.getException());
+                                Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                                updateUI();
+                            }
+                        });
+            }
+            // If they dont match
+            else{
+                Toast.makeText(RegisterActivity.this, "Passwords don't match", Toast.LENGTH_SHORT).show();
+            }
+
+
+
         }
     };
 
@@ -63,6 +74,7 @@ public class RegisterActivity extends AppCompatActivity {
         Button registerBtn = findViewById(R.id.registerButton);
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
+        confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
 
         registerBtn.setOnClickListener(registerBtnListener);
 
