@@ -6,6 +6,13 @@
     android:padding="16dp">
 
     <EditText
+        android:id="@+id/nameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Name"
+        android:inputType="text"/>
+
+    <EditText
         android:id="@+id/emailEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,6 +32,36 @@
         android:layout_height="wrap_content"
         android:hint="Confirm Password"
         android:inputType="textPassword"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:text="I am artist:" />
+
+        <CheckBox
+            android:id="@+id/artistCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/bioEditText"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:gravity="top|start"
+        android:hint="Bio"
+        android:inputType="textMultiLine"
+        android:scrollHorizontally="false"
+        android:imeOptions="actionDone"
+    />
 
     <Button
         android:id="@+id/registerButton"
