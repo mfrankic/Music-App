@@ -4,23 +4,36 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.Objects;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
-    private TextInputEditText emailEditText, passwordEditText, passwordConfirmEditText;
+    private TextInputEditText emailEditText, passwordEditText, confirmPasswordEditText, nameEditText, bioEditText;
+    private CheckBox artistCheckBox;
     private FirebaseUser currentUser;
-
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    // Get a reference to the collection you want to add the document to
+    CollectionReference collectionRef = db.collection("users");
     View.OnClickListener registerBtnListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -45,15 +58,50 @@ public class RegisterActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("LOGIN", "createUserWithEmail:success");
                             currentUser = auth.getCurrentUser();
-                            recreate();
+                            updateUI();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("LOGIN", "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+
+                            String errorMessage = task.getException().toString();
+                            String[] lines = errorMessage.split("\n");
+                            String firstLine = lines[0];
+                            String[] parts = firstLine.split(":");
+                            String error = parts.length > 1 ? parts[1].trim() : firstLine;
+
+                            Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG).show();
                         }
                     });
         }
     };
+
+    private void updateUI() {
+        // Create a new document with a custom ID
+        String customId = currentUser.getUid().toString();
+        DocumentReference documentRef = collectionRef.document(customId);
+
+        // Add entry to user colletcion
+        Map<String, Object> user = new HashMap<>();
+        user.put("name", nameEditText.getText().toString());
+        user.put("bio", bioEditText.getText().toString());
+        user.put("isArtist", artistCheckBox.isChecked());
+
+        documentRef.set(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("Register", "Document added with ID: " + customId);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("Register", "Error adding document", e);
+                    }
+                });
+
+        recreate();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +117,9 @@ public class RegisterActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         passwordConfirmEditText = findViewById(R.id.passwordConfirmEditText);
+        nameEditText = findViewById(R.id.nameEditText);
+        bioEditText = findViewById(R.id.bioEditText);
+        artistCheckBox = findViewById(R.id.artistCheckBox);
 
         MaterialButton registerBtn = findViewById(R.id.registerButton);
         registerBtn.setOnClickListener(registerBtnListener);
