@@ -38,12 +38,10 @@ public class SettingsFragment extends Fragment {
         assert activity != null;
 
         MaterialToolbar toolbar = view.findViewById(R.id.top_bar);
-        toolbar.setNavigationOnClickListener(v -> {
-            activity.getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.main_fragment_container, activity.homeFragment)
-                    .commit();
-        });
+        toolbar.setNavigationOnClickListener(v -> activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment_container, activity.homeFragment)
+                .commit());
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
         SwitchMaterial themeSwitch = view.findViewById(R.id.switch_theme);

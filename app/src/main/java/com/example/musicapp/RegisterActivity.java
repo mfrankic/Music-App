@@ -10,10 +10,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -22,13 +22,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import java.util.Objects;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
-    private TextInputEditText emailEditText, passwordEditText, confirmPasswordEditText, nameEditText, bioEditText;
+    private TextInputEditText emailEditText, passwordEditText, passwordConfirmEditText, nameEditText, bioEditText;
     private CheckBox artistCheckBox;
     private FirebaseUser currentUser;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
