@@ -4,14 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,10 +23,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.util.Objects;
+
 public class RegisterActivity extends AppCompatActivity {
 
-    private FirebaseAuth auth = FirebaseAuth.getInstance();
-    private EditText emailEditText, passwordEditText, confirmPasswordEditText, nameEditText, bioEditText;
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+    private TextInputEditText emailEditText, passwordEditText, confirmPasswordEditText, nameEditText, bioEditText;
     private CheckBox artistCheckBox;
     private FirebaseUser currentUser;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -36,43 +38,40 @@ public class RegisterActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
 
-            String email = emailEditText.getText().toString();
-            String password = passwordEditText.getText().toString();
-            String passwordConfirm = confirmPasswordEditText.getText().toString();
+            String email = Objects.requireNonNull(emailEditText.getText()).toString();
+            String password = Objects.requireNonNull(passwordEditText.getText()).toString();
+            String passwordConfirm = Objects.requireNonNull(passwordConfirmEditText.getText()).toString();
 
-            // Check if passwords match and fields are not empty
-            if (password.equals(passwordConfirm) && !email.isEmpty() && !password.isEmpty()){
-                auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(RegisterActivity.this, task -> {
-                            if (task.isSuccessful()) {
-                                // Sign in success, update UI with the signed-in user's information
-                                Log.d("LOGIN", "createUserWithEmail:success");
-                                currentUser = auth.getCurrentUser();
-                                Toast.makeText(RegisterActivity.this, "Account created", Toast.LENGTH_LONG).show();
-                                updateUI();
-                            } else {
-                                // If sign in fails, display a message to the user.
-                                Log.w("LOGIN", "createUserWithEmail:failure", task.getException());
-
-                                String errorMessage = task.getException().toString();
-                                String[] lines = errorMessage.split("\n");
-                                String firstLine = lines[0];
-                                String[] parts = firstLine.split(":");
-                                String error = parts.length > 1 ? parts[1].trim() : firstLine;
-
-                                Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG).show();
-                                //Log.d("LOGINexep", task.getException().toString());
-                                //updateUI();
-                            }
-                        });
-            }
-            // If they dont match
-            else{
-                Toast.makeText(view.getContext(), "Passwords don't match or fields are empty", Toast.LENGTH_SHORT).show();
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(RegisterActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                return;
             }
 
+            if (!password.equals(passwordConfirm)) {
+                Toast.makeText(RegisterActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
+            auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(RegisterActivity.this, task -> {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d("LOGIN", "createUserWithEmail:success");
+                            currentUser = auth.getCurrentUser();
+                            updateUI();
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w("LOGIN", "createUserWithEmail:failure", task.getException());
 
+                            String errorMessage = task.getException().toString();
+                            String[] lines = errorMessage.split("\n");
+                            String firstLine = lines[0];
+                            String[] parts = firstLine.split(":");
+                            String error = parts.length > 1 ? parts[1].trim() : firstLine;
+
+                            Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG).show();
+                        }
+                    });
         }
     };
 
@@ -101,8 +100,7 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 });
 
-        finish();
-        startActivity(getIntent());
+        recreate();
     }
 
     @Override
@@ -116,16 +114,21 @@ public class RegisterActivity extends AppCompatActivity {
             finish();
         }
 
-        auth = FirebaseAuth.getInstance();
-        Button registerBtn = findViewById(R.id.registerButton);
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
-        confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
+        passwordConfirmEditText = findViewById(R.id.passwordConfirmEditText);
         nameEditText = findViewById(R.id.nameEditText);
         bioEditText = findViewById(R.id.bioEditText);
         artistCheckBox = findViewById(R.id.artistCheckBox);
 
+        MaterialButton registerBtn = findViewById(R.id.registerButton);
         registerBtn.setOnClickListener(registerBtnListener);
+
+        MaterialButton loginBtn = findViewById(R.id.loginActivityButton);
+        loginBtn.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        });
 
     }
 }

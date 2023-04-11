@@ -1,7 +1,11 @@
 package com.example.musicapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.MenuItem;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -9,7 +13,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.fragment.app.Fragment;
 
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -17,12 +24,17 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Objects;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
-    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
+
+    protected final HomeFragment homeFragment = new HomeFragment();
+    protected final SettingsFragment settingsFragment = new SettingsFragment();
+
+    protected final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
@@ -36,41 +48,35 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
 
-        Button logoutBtn = findViewById(R.id.logout);
-        Calendar calendar = Calendar.getInstance();
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-
-        String greeting;
-        if (hour < 5) {
-            greeting = "Good morning? \uD83E\uDD14";
-        } else if (hour < 12) {
-            greeting = "Good morning!";
-        } else if (hour < 18) {
-            greeting = "Good afternoon!";
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode_enabled", false);
+        if (darkModeEnabled) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         } else {
-            greeting = "Good evening!";
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
 
-        TextView greetingTextView = findViewById(R.id.greeting_textview);
-        greetingTextView.setText(greeting);
+        NavigationBarView bottomNavigationView = findViewById(R.id.bottom_bar);
+        bottomNavigationView.setOnItemSelectedListener(this);
+        bottomNavigationView.setSelectedItemId(R.id.home_button);
 
-        ImageView notificationButton = findViewById(R.id.notification_button);
-        notificationButton.setOnClickListener(v -> {
-            // handle notification button click
-            System.out.println("Notification button clicked");
-        });
-
-        ImageView settingsButton = findViewById(R.id.settings_button);
-        settingsButton.setOnClickListener(v -> {
-            // handle settings button click
-            System.out.println("Settings button clicked");
-        });
-
-        logoutBtn.setOnClickListener((view) -> {
-            auth.signOut();
-            updateUI();
-        });
-
+        if (savedInstanceState != null) {
+            String fragmentName = savedInstanceState.getString("FRAGMENT");
+            Log.d("MainActivity", "Fragment name: " + fragmentName);
+            if (fragmentName != null) {
+                try {
+                    Class<?> fragmentClass = Class.forName(fragmentName);
+                    Fragment fragment = (Fragment) fragmentClass.newInstance();
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.main_fragment_container, fragment)
+                            .commit();
+                } catch (ClassNotFoundException | IllegalAccessException |
+                         InstantiationException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
         /*test
         // Create a new user with a first and last name
@@ -97,9 +103,43 @@ public class MainActivity extends AppCompatActivity {
          */
     }
 
-    private void updateUI() {
-        finish();
-        startActivity(getIntent());
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        String fragmentName = Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.main_fragment_container)).getClass().getName();
+        outState.putString("FRAGMENT", fragmentName);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_container);
+        if (currentFragment instanceof HomeFragment) {
+            super.onBackPressed();
+        } else {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_fragment_container, homeFragment)
+                    .commit();
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.home_button) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_fragment_container, homeFragment)
+                    .commit();
+            return true;
+        } else if (itemId == R.id.search_button) {
+            Log.d("MainActivity", "Search button clicked");
+            return true;
+        } else if (itemId == R.id.library_button) {
+            Log.d("MainActivity", "Library button clicked");
+            return true;
+        }
+        return false;
     }
 
 }
