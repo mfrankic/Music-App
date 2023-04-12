@@ -26,4 +26,6 @@
     <string name="login_here">Have an account? Log in here</string>
     <string name="recently_played_page">Recently played page</string>
     <string name="featured">Featured</string>
+    <string name="switch_artist">Artist</string>
+    <string name="label_email">Email:   </string>
 </resources>

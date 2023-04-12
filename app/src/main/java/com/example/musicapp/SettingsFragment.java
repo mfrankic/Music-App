@@ -3,18 +3,33 @@ package com.example.musicapp;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 public class SettingsFragment extends Fragment {
 
+    public TextView name, email, bio;
+    public SwitchMaterial artistSwitch;
+    protected FirebaseAuth auth;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     public SettingsFragment() {
         // Required empty public constructor
     }
@@ -60,5 +75,43 @@ public class SettingsFragment extends Fragment {
             activity.auth.signOut();
             activity.recreate();
         });
+
+        auth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = auth.getCurrentUser();
+        DocumentReference docRef = db.collection("users").document(currentUser.getUid());
+
+        name = view.findViewById(R.id.settings_text_name);
+        email = view.findViewById(R.id.settings_label_email);
+        bio = view.findViewById(R.id.settings_text_bio);
+        artistSwitch = view.findViewById(R.id.switch_artist);
+
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d("SETTINGS", "DocumentSnapshot data: " + document.get("name"));
+                        name.setText(String.valueOf(document.get("name")));
+                        bio.setText(String.valueOf(document.get("bio")));
+                        if (document.get("isArtist").equals(true)){
+                            artistSwitch.setChecked(true);
+                        }else
+                        {
+                            artistSwitch.setChecked(false);
+                        }
+
+                    } else {
+                        Log.d("SETTINGS", "No such document");
+                    }
+                } else {
+                    Log.d("SETTINGS", "get failed with ", task.getException());
+                }
+            }
+        });
+
+        email.setText(currentUser.getEmail());
+
+
     }
 }
