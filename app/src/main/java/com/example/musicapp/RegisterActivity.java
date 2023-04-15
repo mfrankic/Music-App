@@ -7,11 +7,8 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -76,28 +73,18 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void updateUI() {
         // Create a new document with a custom ID
-        String customId = currentUser.getUid().toString();
+        String customId = currentUser.getUid();
         DocumentReference documentRef = collectionRef.document(customId);
 
-        // Add entry to user colletcion
+        // Add entry to user collection
         Map<String, Object> user = new HashMap<>();
         user.put("name", nameEditText.getText().toString());
         user.put("bio", bioEditText.getText().toString());
         user.put("isArtist", artistCheckBox.isChecked());
 
         documentRef.set(user)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("Register", "Document added with ID: " + customId);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("Register", "Error adding document", e);
-                    }
-                });
+                .addOnSuccessListener(aVoid -> Log.d("Register", "Document added with ID: " + customId))
+                .addOnFailureListener(e -> Log.w("Register", "Error adding document", e));
 
         recreate();
     }
