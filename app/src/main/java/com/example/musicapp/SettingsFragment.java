@@ -6,12 +6,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,12 +23,15 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.logging.Logger;
+
 public class SettingsFragment extends Fragment {
 
     public TextView name, email, bio;
     public SwitchMaterial artistSwitch;
     protected FirebaseAuth auth;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -73,6 +79,7 @@ public class SettingsFragment extends Fragment {
             activity.recreate();
         });
 
+
         auth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = auth.getCurrentUser();
         DocumentReference docRef = db.collection("users").document(currentUser.getUid());
@@ -100,6 +107,39 @@ public class SettingsFragment extends Fragment {
         });
 
         email.setText(currentUser.getEmail());
+
+        artistSwitch.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+            Log.d("art", Boolean.toString(isChecked));
+
+            if (isChecked) {
+                docRef.update("isArtist", true)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                            }
+                        });
+            } else
+            {
+                docRef.update("isArtist", false)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                            }
+                        });
+            }
+            });
+
+
 
 
     }

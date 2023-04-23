@@ -22,6 +22,8 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
 
     protected final HomeFragment homeFragment = new HomeFragment();
+    protected final UploadSongFragment uploadSongFragment = new UploadSongFragment();
+
     protected final SettingsFragment settingsFragment = new SettingsFragment();
 
     protected final FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -127,6 +129,10 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             return true;
         } else if (itemId == R.id.library_button) {
             Log.d("MainActivity", "Library button clicked");
+            return true;
+        } else if (itemId == R.id.upload_song_button){
+            getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, uploadSongFragment).commit();
+            Log.d("MainActivity", "Upload song clicket");
             return true;
         }
         return false;
