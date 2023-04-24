@@ -3,6 +3,7 @@ package com.example.musicapp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,6 +28,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -34,6 +37,8 @@ public class UploadSongFragment extends Fragment {
 
     private Button browseBtn, uploadBtn;
     private String songPath;
+    private Uri uri;
+    private File songFile;
     public UploadSongFragment() {
         // Required empty public constructor
     }
@@ -53,10 +58,7 @@ public class UploadSongFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 10){
-            String path = data.getData().getEncodedPath();
-
-            Log.d("path", path);
-            songPath = String.valueOf(path);
+            uri = data.getData();
         }
     }
 
@@ -66,6 +68,7 @@ public class UploadSongFragment extends Fragment {
 
         MainActivity activity = (MainActivity) getActivity();
         assert activity != null;
+
 
         /*
         MaterialToolbar toolbar = view.findViewById(R.id.top_bar);
@@ -81,7 +84,7 @@ public class UploadSongFragment extends Fragment {
         browseBtn = view.findViewById(R.id.fragment_upload_song_browse_btn);
         browseBtn.setOnClickListener(v -> {
             // Define the intent to open the file picker
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.setType("*/*"); // Set the MIME type of the files to select
 
             startActivityForResult(intent, 10);
@@ -91,10 +94,8 @@ public class UploadSongFragment extends Fragment {
         uploadBtn = view.findViewById(R.id.fragment_upload_upload_song_btn);
         uploadBtn.setOnClickListener(v ->{
             StorageReference song = storageRef.child("song.mp3");
-            File songFile = new File(songPath);
-            Log.d("upload", songFile.toString());
-            Uri file = Uri.fromFile(new File(songPath));
-            UploadTask uploadTask = song.putFile(file);
+            //Uri file = Uri.fromFile(songFile);
+            UploadTask uploadTask = song.putFile(uri);
             // Register observers to listen for when the download is done or if it fails
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
