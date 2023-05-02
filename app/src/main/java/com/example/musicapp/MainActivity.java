@@ -130,9 +130,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         } else if (itemId == R.id.library_button) {
             Log.d("MainActivity", "Library button clicked");
             return true;
-        } else if (itemId == R.id.upload_song_button){
+        } else if (itemId == R.id.upload_song_button) {
             getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, uploadSongFragment).commit();
-            Log.d("MainActivity", "Upload song clicket");
+            Log.d("MainActivity", "Upload song clicked");
             return true;
         }
         return false;
