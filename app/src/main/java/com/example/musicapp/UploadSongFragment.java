@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -21,17 +22,24 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -40,7 +48,7 @@ public class UploadSongFragment extends Fragment {
     private String songPath;
     private TextView fileToUpload;
     private EditText songName;
-    private Spinner genre;
+    private Spinner genre, album;
     private Uri uri;
     private File songFile;
     protected FirebaseAuth auth;
@@ -74,6 +82,7 @@ public class UploadSongFragment extends Fragment {
                         uri = data.getData();
 
                         fileToUpload.setText(uri.getPath());
+                        Toast.makeText(getContext(), "Music file selected", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -107,8 +116,30 @@ public class UploadSongFragment extends Fragment {
         fileToUpload = view.findViewById(R.id.fragment_upload_upload_file);
         songName = view.findViewById(R.id.fragment_upload_song_name);
         genre = view.findViewById(R.id.fragment_upload_song_genre_spinner);
-        Spinner album = view.findViewById(R.id.fragment_upload_song_album_spinner);
+        album = view.findViewById(R.id.fragment_upload_song_album_spinner);
 
+        CollectionReference albumsColl = db.collection("albums");
+        ArrayList<String> albumList = new ArrayList<>();
+        albumsColl.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        albumList.add(document.getString("albumName"));
+                        //Log.d(TAG, document.getId() + " => " + document.getData());
+                    }
+                    Log.d("album", albumList.toString());
+                    // Create an ArrayAdapter using the string array and a default spinner layout
+                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(),     android.R.layout.simple_spinner_item, albumList);
+                    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                    // Apply the adapter to the spinner
+                    album.setAdapter(arrayAdapter);
+                } else {
+                    //Log.d(TAG, "Error getting documents: ", task.getException());
+                }
+            }
+        });
 
         // Browse button click listener
         Button browseBtn = view.findViewById(R.id.fragment_upload_song_browse_btn);
@@ -137,13 +168,11 @@ public class UploadSongFragment extends Fragment {
             uploadTask.addOnFailureListener(exception -> {
                 // Handle unsuccessful uploads
                 Log.d("TAG", "Upload failed");
-                new Toast(getContext());
                 Toast.makeText(getContext(), "Upload failed", Toast.LENGTH_LONG).show();
             }).addOnSuccessListener(taskSnapshot -> {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                 Log.d("TAG", "Upload successful");
-                new Toast(getContext());
-                Toast.makeText(getContext(), "Upload successful", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Song uploaded successfully", Toast.LENGTH_SHORT).show();
             });
 
             // Update user document to reference the uploaded song
