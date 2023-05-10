@@ -1,16 +1,21 @@
 package com.example.musicapp;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +29,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -37,7 +43,12 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +58,12 @@ public class UploadSongFragment extends Fragment {
 
     private String songPath;
     private TextView fileToUpload;
-    private EditText songName;
+    private EditText songName, albumName, albumDatePicker;
     private Spinner genre, album;
+    private int year, month, day;
+    private CheckBox newAlbumCheck;
+    private LinearLayout albumNameLay, albumDateLay;
+    private DatePickerDialog picker;
     private Uri uri;
     private File songFile;
     protected FirebaseAuth auth;
@@ -117,6 +132,11 @@ public class UploadSongFragment extends Fragment {
         songName = view.findViewById(R.id.fragment_upload_song_name);
         genre = view.findViewById(R.id.fragment_upload_song_genre_spinner);
         album = view.findViewById(R.id.fragment_upload_song_album_spinner);
+        newAlbumCheck = view.findViewById(R.id.album_checkBox);
+        albumNameLay = view.findViewById(R.id.album_name_layout);
+        albumDateLay = view.findViewById(R.id.album_date_layout);
+        albumName = view.findViewById(R.id.fragment_upload_album_name);
+        albumDatePicker = view.findViewById(R.id.fragment_upload_album_date);
 
         CollectionReference albumsColl = db.collection("albums");
         ArrayList<String> albumList = new ArrayList<>();
@@ -141,6 +161,22 @@ public class UploadSongFragment extends Fragment {
             }
         });
 
+        albumDatePicker.setOnClickListener(v -> {
+            final Calendar cldr = Calendar.getInstance();
+            day = cldr.get(Calendar.DAY_OF_MONTH);
+            month = cldr.get(Calendar.MONTH);
+            year = cldr.get(Calendar.YEAR);
+            // date picker dialog
+            picker = new DatePickerDialog(getActivity(),
+                    new DatePickerDialog.OnDateSetListener() {
+                        @Override
+                        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                            albumDatePicker.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+                        }
+                    }, year, month, day);
+            picker.show();
+        });
+
         // Browse button click listener
         Button browseBtn = view.findViewById(R.id.fragment_upload_song_browse_btn);
         browseBtn.setOnClickListener(v -> {
@@ -150,6 +186,16 @@ public class UploadSongFragment extends Fragment {
 
             someActivityResultLauncher.launch(intent);
 
+        });
+
+        newAlbumCheck.setOnCheckedChangeListener((v, isChecked) -> {
+            if (isChecked){
+                albumNameLay.setVisibility(View.VISIBLE);
+                albumDateLay.setVisibility(View.VISIBLE);
+            }else {
+                albumNameLay.setVisibility(View.GONE);
+                albumDateLay.setVisibility(View.GONE);
+            }
         });
 
         // Upload btn listener and upload of song
@@ -184,6 +230,29 @@ public class UploadSongFragment extends Fragment {
 
             subCollectionRef.add(data)
                     .addOnSuccessListener(documentReference ->
+                            Log.d("TAG", "Document added with ID: " + documentReference.getId()))
+                    .addOnFailureListener(e -> Log.w("TAG", "Error adding document", e));
+
+
+            Map<String, Object> albumData = new HashMap<>();
+            albumData.put("albumName", albumName.getText().toString());
+
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            try {
+                Date date = dateFormat.parse(String.valueOf(day) + "/" + String.valueOf(month) + "/" + String.valueOf(year));
+
+                long time = date.getTime();
+                Timestamp timestamp = new Timestamp(date);
+                albumData.put("releaseDate", timestamp);
+                Log.d("date", String.valueOf(day) + "/" + String.valueOf(month) + "/" + String.valueOf(year));
+
+            }catch (Exception e){
+                Log.e("parse date", "ERROR");
+            }
+
+
+
+            albumsColl.add(albumData).addOnSuccessListener(documentReference ->
                             Log.d("TAG", "Document added with ID: " + documentReference.getId()))
                     .addOnFailureListener(e -> Log.w("TAG", "Error adding document", e));
 
