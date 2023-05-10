@@ -199,13 +199,70 @@
                     android:textSize="18sp" />
 
                 <CheckBox
-                    android:id="@+id/checkBox"
+                    android:id="@+id/album_checkBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     />
 
 
+
+
+
+
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/album_name_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp"
+                android:layout_marginTop="14dp"
+                android:visibility="gone">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Album name:"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/fragment_upload_album_name"
+                    android:text="My album"></EditText>
+
+
+            </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/album_date_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp"
+            android:layout_marginTop="14dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Release date: "
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/fragment_upload_album_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:ems="10"
+                android:hint="Enter Date" />
+        </LinearLayout>
+
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/fragment_upload_upload_song_btn"
