@@ -57,11 +57,12 @@ public class SettingsFragment extends Fragment {
                 .commit());
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         SwitchMaterial themeSwitch = view.findViewById(R.id.switch_theme);
         themeSwitch.setChecked(sharedPreferences.getBoolean("dark_mode_enabled", false));
 
         themeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
+            //SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean("dark_mode_enabled", isChecked);
             editor.apply();
             activity.onSaveInstanceState(new Bundle());
@@ -109,16 +110,21 @@ public class SettingsFragment extends Fragment {
             if (isChecked) {
                 docRef.update("isArtist", true)
                         .addOnSuccessListener(aVoid -> {
+                            editor.putBoolean("isArtist", true);
+                            editor.apply();
                         })
                         .addOnFailureListener(e -> {
                         });
             } else {
                 docRef.update("isArtist", false)
                         .addOnSuccessListener(aVoid -> {
+                            editor.putBoolean("isArtist", false);
+                            editor.apply();
                         })
                         .addOnFailureListener(e -> {
                         });
             }
+
         });
 
 
