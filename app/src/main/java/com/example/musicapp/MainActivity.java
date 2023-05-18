@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     protected final UploadSongFragment uploadSongFragment = new UploadSongFragment();
 
     protected final SettingsFragment settingsFragment = new SettingsFragment();
+    protected final LibraryFragment libraryFragment = new LibraryFragment();
 
     private View uploadButtonItem;
 
@@ -182,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             Log.d("MainActivity", "Search button clicked");
             return true;
         } else if (itemId == R.id.library_button) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, libraryFragment).commit();
             Log.d("MainActivity", "Library button clicked");
             return true;
         } else if (itemId == R.id.upload_song_button) {
