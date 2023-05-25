@@ -29,6 +29,13 @@
     <string name="switch_artist">Artist</string>
     <string name="label_email">Email:   </string>
     <string name="upload">Upload</string>
+    <string name="song_title">Song Title</string>
+    <string name="artist">Artist</string>
+    <string name="skip_previous">Skip previous</string>
+    <string name="skip_next">Skip next</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="song_start_time">00:00</string>
     <string-array name="genre_array">
         <item>Rock</item>
         <item>Pop</item>

@@ -5,7 +5,6 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -27,19 +25,13 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -50,9 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -62,6 +52,7 @@ public class UploadSongFragment extends Fragment {
     private TextView fileToUpload;
     private EditText songName, albumName, albumDatePicker;
     private int calDay, calMonth, calYear;
+    private String dateString;
     private Spinner genre, album;
     private int year, month, day;
     private CheckBox newAlbumCheck;
@@ -73,8 +64,9 @@ public class UploadSongFragment extends Fragment {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String albumUUID;
     private UUID uuidAlbum;
-    private String albumuuidString;
+    private String uuidAlbumString;
     private TextView albumSelectLabel;
+
     public UploadSongFragment() {
         // Required empty public constructor
     }
@@ -148,28 +140,25 @@ public class UploadSongFragment extends Fragment {
         CollectionReference albumsColl = db.collection("albums");
         ArrayList<String> albumList = new ArrayList<>();
         Map<String, String> albumListWithIDs = new HashMap<>();
-        albumsColl.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        albumList.add(document.getString("albumName"));
-                        albumListWithIDs.put(document.getString("albumName"), document.getId().toString());
+        albumsColl.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    albumList.add(document.getString("albumName"));
+                    albumListWithIDs.put(document.getString("albumName"), document.getId());
 
-                        //Log.d(TAG, document.getId() + " => " + document.getData());
-                    }
-                    Log.d("album", albumList.toString());
-                    // Create an ArrayAdapter using the string array and a default spinner layout
-                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(),     android.R.layout.simple_spinner_item, albumList);
-                    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-                    // Apply the adapter to the spinner
-                    album.setAdapter(arrayAdapter);
-                } else {
-                    //Log.d(TAG, "Error getting documents: ", task.getException());
+                    //Log.d(TAG, document.getId() + " => " + document.getData());
                 }
-                Log.d("albums", albumListWithIDs.toString());
+                Log.d("album", albumList.toString());
+                // Create an ArrayAdapter using the string array and a default spinner layout
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, albumList);
+                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                // Apply the adapter to the spinner
+                album.setAdapter(arrayAdapter);
+            } else {
+                //Log.d(TAG, "Error getting documents: ", task.getException());
             }
+            Log.d("albums", albumListWithIDs.toString());
         });
 
         albumDatePicker.setOnClickListener(v -> {
@@ -179,15 +168,13 @@ public class UploadSongFragment extends Fragment {
             year = cldr.get(Calendar.YEAR);
             // date picker dialog
             picker = new DatePickerDialog(getActivity(),
-                    new DatePickerDialog.OnDateSetListener() {
-                        @Override
-                        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                            albumDatePicker.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
-                            Log.d("datum", String.valueOf(dayOfMonth) + " " + String.valueOf(monthOfYear + 1) + " " + String.valueOf(year));
-                            calDay = dayOfMonth;
-                            calMonth = monthOfYear + 1;
-                            calYear = year;
-                        }
+                    (view1, year, monthOfYear, dayOfMonth) -> {
+                        dateString = String.join("/", String.valueOf(dayOfMonth), String.valueOf(monthOfYear + 1), String.valueOf(year));
+                        albumDatePicker.setText(dateString);
+                        Log.d("datum", dateString);
+                        calDay = dayOfMonth;
+                        calMonth = monthOfYear + 1;
+                        calYear = year;
                     }, year, month, day);
             picker.show();
         });
@@ -204,12 +191,12 @@ public class UploadSongFragment extends Fragment {
         });
 
         newAlbumCheck.setOnCheckedChangeListener((v, isChecked) -> {
-            if (isChecked){
+            if (isChecked) {
                 albumNameLay.setVisibility(View.VISIBLE);
                 albumDateLay.setVisibility(View.VISIBLE);
                 album.setVisibility(View.GONE);
                 albumSelectLabel.setVisibility(View.GONE);
-            }else {
+            } else {
                 albumNameLay.setVisibility(View.GONE);
                 albumDateLay.setVisibility(View.GONE);
                 album.setVisibility(View.VISIBLE);
@@ -223,12 +210,10 @@ public class UploadSongFragment extends Fragment {
         uploadBtn.setOnClickListener(v -> {
 
 
-
-            // Ako je selectan novi album, uploaaj prvo album
-            if (newAlbumCheck.isChecked()){
+            // If new album is selected, first create new album in database
+            if (newAlbumCheck.isChecked()) {
                 uuidAlbum = UUID.randomUUID();
-                albumuuidString = uuidAlbum.toString();
-
+                uuidAlbumString = uuidAlbum.toString();
 
 
                 Map<String, Object> albumData = new HashMap<>();
@@ -236,30 +221,20 @@ public class UploadSongFragment extends Fragment {
 
                 DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
                 try {
-                    Date date = dateFormat.parse(String.valueOf(calDay) + "/" + String.valueOf(calMonth) + "/" + String.valueOf(calYear));
+                    Date date = dateFormat.parse(dateString);
 
                     long time = date.getTime();
                     Timestamp timestamp = new Timestamp(date);
                     albumData.put("releaseDate", timestamp);
-                    Log.d("date", String.valueOf(day) + "/" + String.valueOf(month) + "/" + String.valueOf(year));
+                    Log.d("date", dateString);
 
-                }catch (Exception e){
+                } catch (Exception e) {
                     Log.e("parse date", "ERROR");
                 }
 
-                albumsColl.document(albumuuidString).set(albumData)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d("TAG", "DocumentSnapshot successfully written!");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w("TAG", "Error writing document", e);
-                            }
-                        });
+                albumsColl.document(uuidAlbumString).set(albumData)
+                        .addOnSuccessListener(aVoid -> Log.d("TAG", "DocumentSnapshot successfully written!"))
+                        .addOnFailureListener(e -> Log.w("TAG", "Error writing document", e));
 
                 /*
                 albumsColl.add(albumData).addOnSuccessListener(documentReference ->{
@@ -269,38 +244,34 @@ public class UploadSongFragment extends Fragment {
 
                  */
 
-                // Upadte album picker
-                albumsColl.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            albumList.clear();
-                            albumListWithIDs.clear();
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                albumList.add(document.getString("albumName"));
-                                albumListWithIDs.put(document.getString("albumName"), document.getId().toString());
+                // Update album picker
+                albumsColl.get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        albumList.clear();
+                        albumListWithIDs.clear();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            albumList.add(document.getString("albumName"));
+                            albumListWithIDs.put(document.getString("albumName"), document.getId().toString());
 
-                                //Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                            Log.d("album", albumList.toString());
-                            // Create an ArrayAdapter using the string array and a default spinner layout
-                            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(),     android.R.layout.simple_spinner_item, albumList);
-                            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-                            // Apply the adapter to the spinner
-                            album.setAdapter(arrayAdapter);
-                        } else {
-                            //Log.d(TAG, "Error getting documents: ", task.getException());
+                            //Log.d(TAG, document.getId() + " => " + document.getData());
                         }
-                        Log.d("albums", albumListWithIDs.toString());
+                        Log.d("album", albumList.toString());
+                        // Create an ArrayAdapter using the string array and a default spinner layout
+                        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, albumList);
+                        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                        // Apply the adapter to the spinner
+                        album.setAdapter(arrayAdapter);
+                    } else {
+                        //Log.d(TAG, "Error getting documents: ", task.getException());
                     }
+                    Log.d("albums", albumListWithIDs.toString());
                 });
             }
             // Get selected album UUID
-            else
-            {
-             String selectedAlbumName = album.getSelectedItem().toString();
-             albumuuidString = albumListWithIDs.get(selectedAlbumName);
+            else {
+                String selectedAlbumName = album.getSelectedItem().toString();
+                uuidAlbumString = albumListWithIDs.get(selectedAlbumName);
 
             }
 
@@ -329,14 +300,12 @@ public class UploadSongFragment extends Fragment {
             data.put("songUUID", uuidString);
             data.put("songName", songName.getText().toString());
             data.put("genre", genre.getSelectedItem().toString());
-            data.put("album", albumuuidString);
+            data.put("album", uuidAlbumString);
 
             subCollectionRef.add(data)
                     .addOnSuccessListener(documentReference ->
                             Log.d("TAG", "Document added with ID: " + documentReference.getId()))
                     .addOnFailureListener(e -> Log.w("TAG", "Error adding document", e));
-
-
 
 
         });

@@ -1,5 +1,6 @@
 package com.example.musicapp;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -33,6 +34,16 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        findViewById(R.id.song_name).setSelected(true);
+        findViewById(R.id.artist_name).setSelected(true);
+
+        // open music player when clicked on music player bar
+        findViewById(R.id.music_player_bar).setOnClickListener(v -> {
+            Intent intent = new Intent(this, MusicPlayerActivity.class);
+            ActivityOptions options = ActivityOptions.makeCustomAnimation(this, R.anim.slide_in_up, R.anim.fade_out);
+            startActivity(intent, options.toBundle());
+        });
 
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser == null) {
@@ -69,30 +80,6 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 }
             }
         }
-
-        /*test
-        // Create a new user with a first and last name
-        Map<String, Object> user = new HashMap<>();
-        user.put("first", "Ada");
-        user.put("last", "Lovelace");
-        user.put("born", 1815);
-
-        // Add a new document with a generated ID
-        db.collection("users")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("DB", "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("DB", "Error adding document", e);
-                    }
-                });
-         */
     }
 
     @Override
