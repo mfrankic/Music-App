@@ -1,12 +1,39 @@
 package com.example.musicapp;
 
+import java.sql.Timestamp;
+
 public class Song {
 
-    private String songName, artistName, songFileUUID, genre, artistID, albumUUDI;
+    private String songName, artistName, songFileUUID, genre, artistID, albumUUDI, albumName;
+    private Timestamp releaseDate;
 
     public Song() {
 
     }
+
+    public Timestamp getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(Timestamp releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public String getAlbumName() {
+        return albumName;
+    }
+
+    public void setAlbumName(String albumName) {
+        this.albumName = albumName;
+    }
+
+
+
+
+
+
+
+
 
     public String getAlbumUUDI() {
         return albumUUDI;
@@ -63,8 +90,11 @@ public class Song {
                 ", artistName='" + artistName + '\'' +
                 ", songFileUUID='" + songFileUUID + '\'' +
                 ", genre='" + genre + '\'' +
-                ", artistUUID='" + artistID + '\'' +
+                ", artistID='" + artistID + '\'' +
                 ", albumUUDI='" + albumUUDI + '\'' +
+  
+                ", albumName='" + albumName + '\'' +
+                ", releaseDate='" + releaseDate + '\'' +
                 '}';
     }
 }
