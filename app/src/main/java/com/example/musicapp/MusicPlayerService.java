@@ -47,9 +47,16 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private boolean isBuffering = false;
     private int lastMediaState = PlaybackStateCompat.STATE_NONE;
 
+    private static boolean isRunning = false;
+
+    public static boolean isRunning() {
+        return isRunning;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
+        isRunning = true;
 
         mediaSession = new MediaSessionCompat(this, "MyMusicService");
         mediaSession.setMediaButtonReceiver(null);
@@ -133,6 +140,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        isRunning = false;
         if (mediaSession != null) {
             mediaSession.release();
             mediaSession = null;
@@ -154,14 +162,6 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
         if (mediaKeyEvent != null) {
             // handle media key events
             if (mediaKeyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-                // handle key press
-                if (mediaKeyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
-                    if (mediaPlayer.isPlaying()) {
-                        pause();
-                    } else {
-                        play();
-                    }
-                }
                 if (mediaKeyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_NEXT) {
                     skipToNext();
                 }
@@ -169,7 +169,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                     skipToPrevious();
                 }
             }
-            
+
             return START_NOT_STICKY;
         }
 
@@ -255,19 +255,20 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             mediaItems = new ArrayList<>();
 
             // TODO: get songs from firebase or change sending items from activity
-            Song firstSong = new Song(songIdsList.get(0), "Don Omar", "Danza Kuduro", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
-            Song secondSong = new Song(songIdsList.get(1), "Akon", "Smack That", "Konvicted", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2FAkon%20-%20Smack%20That%20(Official%20Music%20Video)%20ft.%20Eminem.mp3?alt=media&token=f728aafc-0cb6-4270-b07b-f3ec40abd347");
-            ArrayList<Song> newList = new ArrayList<>();
+            TempSong firstSong = new TempSong(songIdsList.get(0), "Don Omar", "Danza Kuduro", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
+            TempSong secondSong = new TempSong(songIdsList.get(1), "Akon", "Smack That", "Konvicted", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2FAkon%20-%20Smack%20That%20(Official%20Music%20Video)%20ft.%20Eminem.mp3?alt=media&token=f728aafc-0cb6-4270-b07b-f3ec40abd347");
+
+            ArrayList<TempSong> newList = new ArrayList<>();
             newList.add(firstSong);
             newList.add(secondSong);
 
-            for (Song song : newList) {
+            for (TempSong song : newList) {
                 MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                         .setMediaId(String.valueOf(song.getSongId()))
                         // Other metadata can be set here like title, artist, etc.
-                        .setTitle(song.getTitle())
-                        .setSubtitle(song.getArtist())
-                        .setDescription(song.getAlbum())
+                        .setTitle(song.getSongName())
+                        .setSubtitle(song.getArtistName())
+                        .setDescription(song.getAlbumName())
                         .setMediaUri(Uri.parse(song.getSongPath()))
                         .build();
 

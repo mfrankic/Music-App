@@ -46,48 +46,18 @@ public class MusicPlayerActivity extends AppCompatActivity {
                 new ComponentName(this, MusicPlayerService.class),
                 connectionCallbacks,
                 null);
-
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        ArrayList<Integer> songList = new ArrayList<>();
-        Song firstSong = new Song(1, "Don Omar", "Danza Kuduro", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
-        Song secondSong = new Song(2, "Akon", "Smack That", "Konvicted", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2FAkon%20-%20Smack%20That%20(Official%20Music%20Video)%20ft.%20Eminem.mp3?alt=media&token=f728aafc-0cb6-4270-b07b-f3ec40abd347");
 
-        songList.add(firstSong.getSongId());
-        songList.add(secondSong.getSongId());
-
-        ArrayList<String> songPaths = new ArrayList<>();
-        songPaths.add(firstSong.getSongPath());
-        songPaths.add(secondSong.getSongPath());
-
-        Intent startServiceIntent = new Intent(this, MusicPlayerService.class);
-        startServiceIntent.putExtra("songList", songPaths);
-
-        Bundle songBundle = new Bundle();
-        songBundle.putIntegerArrayList("songList", songList);
+        // if service is not running then start it
+        if (!MusicPlayerService.isRunning()) {
+            initializeData();
+        }
 
         mediaBrowser.connect();
-        mediaBrowser.subscribe("media", songBundle, new MediaBrowserCompat.SubscriptionCallback() {
-            @Override
-            public void onChildrenLoaded(String parentId, List<MediaBrowserCompat.MediaItem> children) {
-                super.onChildrenLoaded(parentId, children);
-            }
-        });
-        this.startService(startServiceIntent);
-
-        // get playback state
-        if (mediaController != null) {
-            PlaybackStateCompat pbStateCompat = mediaController.getPlaybackState();
-            MaterialButton playPauseButton = findViewById(R.id.play_pause_button);
-            if (pbStateCompat.getState() == PlaybackStateCompat.STATE_PLAYING) {
-                playPauseButton.setIconResource(R.drawable.ic_pause_circle);
-            } else {
-                playPauseButton.setIconResource(R.drawable.ic_play_circle);
-            }
-        }
     }
 
     @Override
@@ -109,8 +79,6 @@ public class MusicPlayerActivity extends AppCompatActivity {
 
                     // Create a MediaControllerCompat
                     mediaController = new MediaControllerCompat(MusicPlayerActivity.this, token);
-
-                    // Save the controller
                     MediaControllerCompat.setMediaController(MusicPlayerActivity.this, mediaController);
 
                     // Finish building the UI
@@ -128,12 +96,46 @@ public class MusicPlayerActivity extends AppCompatActivity {
                 }
             };
 
+    private void initializeData() {
+        ArrayList<Integer> songList = new ArrayList<>();
+        TempSong firstSong = new TempSong(1, "Don Omar", "Danza Kuduro", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
+        TempSong secondSong = new TempSong(2, "Akon", "Smack That", "Konvicted", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2FAkon%20-%20Smack%20That%20(Official%20Music%20Video)%20ft.%20Eminem.mp3?alt=media&token=f728aafc-0cb6-4270-b07b-f3ec40abd347");
+
+        songList.add(firstSong.getSongId());
+        songList.add(secondSong.getSongId());
+
+        ArrayList<String> songPaths = new ArrayList<>();
+        songPaths.add(firstSong.getSongPath());
+        songPaths.add(secondSong.getSongPath());
+
+        Intent startServiceIntent = new Intent(this, MusicPlayerService.class);
+        startServiceIntent.putExtra("songList", songPaths);
+
+        Bundle songBundle = new Bundle();
+        songBundle.putIntegerArrayList("songList", songList);
+        mediaBrowser.subscribe("media", songBundle, new MediaBrowserCompat.SubscriptionCallback() {
+            @Override
+            public void onChildrenLoaded(String parentId, List<MediaBrowserCompat.MediaItem> children) {
+                super.onChildrenLoaded(parentId, children);
+            }
+        });
+        this.startService(startServiceIntent);
+    }
+
     void buildTransportControls() {
         // Grab the view for the play/pause button
         MaterialButton playPauseButton = findViewById(R.id.play_pause_button);
         MaterialButton nextButton = findViewById(R.id.next_button);
         MaterialButton previousButton = findViewById(R.id.previous_button);
         mSeekBar = findViewById(R.id.song_progress);
+        playPauseButton.setEnabled(true);
+
+        PlaybackStateCompat playbackState = mediaController.getPlaybackState();
+        if (playbackState.getState() == PlaybackStateCompat.STATE_PLAYING) {
+            playPauseButton.setIconResource(R.drawable.ic_pause_circle);
+        } else {
+            playPauseButton.setIconResource(R.drawable.ic_play_circle);
+        }
 
         // Attach a listener to the button
         playPauseButton.setOnClickListener(v -> {
@@ -151,6 +153,33 @@ public class MusicPlayerActivity extends AppCompatActivity {
         nextButton.setOnClickListener(v -> mediaController.getTransportControls().skipToNext());
 
         previousButton.setOnClickListener(v -> mediaController.getTransportControls().skipToPrevious());
+
+        // if song is playing then update the seekbar
+        if (playbackState.getState() != PlaybackStateCompat.STATE_NONE) {
+            MediaMetadataCompat metadata = mediaController.getMetadata();
+
+            int songDuration = (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) / 1000;
+            int durationMinutes = songDuration / 60;
+            int durationSeconds = songDuration % 60;
+
+            songElapsed = (int) playbackState.getPosition() / 1000;
+            int minutes = songElapsed / 60;
+            int seconds = songElapsed % 60;
+
+            mSeekBar.setMax(songDuration);
+            mSeekBar.setProgress(songElapsed);
+
+            String durationString = String.format("%02d:%02d", durationMinutes, durationSeconds);
+            String elapsedTimeString = String.format("%02d:%02d", minutes, seconds);
+
+            MaterialTextView durationView = findViewById(R.id.duration);
+            MaterialTextView elapsedTimeView = findViewById(R.id.elapsed_time);
+
+            elapsedTimeView.setText(elapsedTimeString);
+            durationView.setText(durationString);
+            
+            mHandler.post(mUpdateElapsedTimeRunnable);
+        }
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
