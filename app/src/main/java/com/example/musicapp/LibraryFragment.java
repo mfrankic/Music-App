@@ -44,7 +44,7 @@ public class LibraryFragment extends Fragment {
 
     private  FirebaseFirestore db;
     private Map<String, String> usersSongCollRef;
-    ArrayList<Song> allSongs;
+    ArrayList<Song> allSongs, artistSongs, genreSongs, releaseYearSongs;
     ArrayList<Album> allAlbums;
     ArrayList<String> allArtists;
     RecyclerView allSongsView;
@@ -53,6 +53,9 @@ public class LibraryFragment extends Fragment {
     Spinner filterBySpinner, filterSpinner;
     ArrayAdapter<String> filterByAdapter, filterAdapter;
     ArrayList<String> allReleaseYears;
+    Button filterBtn;
+    String selectedItem;
+    Integer counter;
     public LibraryFragment() {
         // Required empty public constructor
     }
@@ -72,7 +75,7 @@ public class LibraryFragment extends Fragment {
    AdapterView.OnItemSelectedListener filterBySpinnerListener =  new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            String selectedItem = (String) parent.getItemAtPosition(position);
+            selectedItem = (String) parent.getItemAtPosition(position);
             // Perform actions based on the selected item
 
             // Example: Show the second spinner when "Genre" is selected
@@ -132,21 +135,21 @@ public class LibraryFragment extends Fragment {
         filterBySpinner.setOnItemSelectedListener(filterBySpinnerListener);
 
     }
-    private void updateSongsWithAlbumData(){
+    private void   updateSongsWithAlbumData(){
+        counter += 1;
         Log.d("songsPrint", allAlbums.toString());
         for(Song song: allSongs){
             String songAlbumID = song.getAlbumUUDI();
             for (Album album: allAlbums){
-                if(album.getAlbumID().equals(String.valueOf(album.getAlbumID()))){
+                if(album.getAlbumID().equals(songAlbumID)){
                     song.setAlbumName(album.getAlbumName());
                     song.setReleaseDate(album.getReleaseDate());
-                    Log.d("songAlbum", song.toString());
+                    Log.d("songAlbum", songAlbumID + "  "+ album.getAlbumID());
+                    Log.d("songAlbum", song.getReleaseDate().toString());
                 }
             }
 
         }
-
-        Log.d("songCount", String.valueOf(allSongs.size()));
 
     }
 
@@ -175,7 +178,7 @@ public class LibraryFragment extends Fragment {
                 } else {
                     Log.d("allSongs", "Error getting documents: ", task.getException());
                 }
-                updateSongsWithAlbumData();
+                //updateSongsWithAlbumData();
                 getAllReleaseYears();
             }
         });
@@ -213,15 +216,16 @@ public class LibraryFragment extends Fragment {
                     }
 
                     // Finally pass songs to adapter to show them in recycle view
-                    setAllSongsAdapter();
+                    setAllSongsAdapter(allSongs);
                     getAlbumData();
                     getAllArtists();
                     //getAllReleaseYears();
 
                 }
             });
-
         }
+
+        //getAlbumData();
     }
     private void  getAllSongs(){
         usersSongCollRef = new HashMap<String, String>();
@@ -245,15 +249,60 @@ public class LibraryFragment extends Fragment {
         });
     }
 
-    private void setAllSongsAdapter(){
-        songsViewAdapter = new SongsViewAdapter(getContext(), allSongs);
+    private void setAllSongsAdapter(ArrayList<Song> songs){
+        songsViewAdapter = new SongsViewAdapter(getContext(), songs);
         allSongsView.setAdapter(songsViewAdapter);
     }
+
+    private void getSongsByArtist(String artistName){
+        artistSongs = new ArrayList<>();
+        for(Song song: allSongs){
+            if(song.getArtistName().equals(artistName)){
+                artistSongs.add(song);
+            }
+        }
+    }
+
+    private void getSongsByGenre(String genre){
+        genreSongs = new ArrayList<>();
+        for(Song song: allSongs){
+            if(song.getGenre().equals(genre)){
+                genreSongs.add(song);
+            }
+        }
+    }
+
+    private void getSongsByYear(String year){
+        releaseYearSongs = new ArrayList<>();
+        for(Song song: allSongs){
+
+            if(song.getReleaseDate() != null){
+                Timestamp timestamp = song.getReleaseDate();
+                Date date = new Date();
+                date.setTime(timestamp.getTime());
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
+                String releaseYear = simpleDateFormat.format(calendar.getTime()).toString();
+                Log.d("byyear", song.getReleaseDate().toString());
+
+                if(releaseYear.equals(year)) {
+                    releaseYearSongs.add(song);
+                }
+            }
+        }
+        Log.d("byyear", String.valueOf(allSongs.size()));
+
+    }
+
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         MainActivity activity = (MainActivity) getActivity();
         assert activity != null;
+
+        counter = 0;
 
         db = FirebaseFirestore.getInstance();
         allSongs = new ArrayList<>();
@@ -263,7 +312,27 @@ public class LibraryFragment extends Fragment {
 
         filterBySpinner = view.findViewById(R.id.filterBySpinner);
         filterSpinner = view.findViewById(R.id.filterSpinner);
+        filterBtn = view.findViewById(R.id.filter_button);
 
+        filterBtn.setOnClickListener(v ->{
+            if(filterBySpinner.getSelectedItem().toString().equals("Artist")){
+                String selectedArtist = filterSpinner.getSelectedItem().toString();
+                getSongsByArtist(selectedArtist);
+                Log.d("byartist", artistSongs.toString());
+                setAllSongsAdapter(artistSongs);
+            }else if (filterBySpinner.getSelectedItem().toString().equals("Genre")){
+                String selectedGenre = filterSpinner.getSelectedItem().toString();
+                getSongsByGenre(selectedGenre);
+                setAllSongsAdapter(genreSongs);
+            }else if (filterBySpinner.getSelectedItem().toString().equals("Release year")){
+                String selectedYear = filterSpinner.getSelectedItem().toString();
+                updateSongsWithAlbumData();
+                getSongsByYear(selectedYear);
+                setAllSongsAdapter(releaseYearSongs);
+                Log.d("byartist", allSongs.toString());
+            }
+
+        });
 
 
 
