@@ -19,6 +19,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textview.MaterialTextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MusicPlayerActivity extends AppCompatActivity {
 
@@ -51,13 +52,30 @@ public class MusicPlayerActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        ArrayList<String> songList = new ArrayList<>();
-        songList.add("https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
+        ArrayList<Integer> songList = new ArrayList<>();
+        Song firstSong = new Song(1, "Don Omar", "Danza Kuduro", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
+        Song secondSong = new Song(2, "Akon", "Smack That", "Konvicted", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2FAkon%20-%20Smack%20That%20(Official%20Music%20Video)%20ft.%20Eminem.mp3?alt=media&token=f728aafc-0cb6-4270-b07b-f3ec40abd347");
+
+        songList.add(firstSong.getSongId());
+        songList.add(secondSong.getSongId());
+
+        ArrayList<String> songPaths = new ArrayList<>();
+        songPaths.add(firstSong.getSongPath());
+        songPaths.add(secondSong.getSongPath());
 
         Intent startServiceIntent = new Intent(this, MusicPlayerService.class);
-        startServiceIntent.putStringArrayListExtra("songList", songList);
+        startServiceIntent.putExtra("songList", songPaths);
+
+        Bundle songBundle = new Bundle();
+        songBundle.putIntegerArrayList("songList", songList);
 
         mediaBrowser.connect();
+        mediaBrowser.subscribe("media", songBundle, new MediaBrowserCompat.SubscriptionCallback() {
+            @Override
+            public void onChildrenLoaded(String parentId, List<MediaBrowserCompat.MediaItem> children) {
+                super.onChildrenLoaded(parentId, children);
+            }
+        });
         this.startService(startServiceIntent);
 
         // get playback state

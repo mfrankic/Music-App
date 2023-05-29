@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -144,11 +145,34 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        MediaButtonReceiver.handleIntent(mediaSession, intent);
+        KeyEvent mediaKeyEvent = MediaButtonReceiver.handleIntent(mediaSession, intent);
         // get the song list from intent
         if (intent == null) {
             return START_NOT_STICKY;
         }
+
+        if (mediaKeyEvent != null) {
+            // handle media key events
+            if (mediaKeyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                // handle key press
+                if (mediaKeyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
+                    if (mediaPlayer.isPlaying()) {
+                        pause();
+                    } else {
+                        play();
+                    }
+                }
+                if (mediaKeyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_NEXT) {
+                    skipToNext();
+                }
+                if (mediaKeyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_PREVIOUS) {
+                    skipToPrevious();
+                }
+            }
+            
+            return START_NOT_STICKY;
+        }
+
         songList = intent.getStringArrayListExtra("songList");
         mCurrentSongIndex = intent.getIntExtra("songIndex", 0);
 
@@ -206,19 +230,92 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
         } else {
             result.detach();
             // Load media items and call sendResult() when ready.
-            loadMediaItems(result);
+            // loadMediaItems(result);
+        }
+    }
+
+    @Override
+    public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result, @NonNull Bundle options) {
+        ArrayList<Integer> songIdsList = options.getIntegerArrayList("songList");
+        // If the media item information is ready, you can call sendResult() immediately.
+        if (mediaItemsAreReady) {
+            result.sendResult(mediaItems);
+        } else {
+            result.detach();
+            // Load media items and call sendResult() when ready.
+            loadMediaItems(result, songIdsList);
         }
     }
 
     // Dummy method for media items loading. You should implement actual logic.
-    private void loadMediaItems(Result<List<MediaBrowserCompat.MediaItem>> result) {
-        // Logic to load media items.
-        result.sendResult(mediaItems);
+    private void loadMediaItems(Result<List<MediaBrowserCompat.MediaItem>> result, ArrayList<Integer> songIdsList) {
+        // Check if the song list is available and not empty
+        if (songIdsList != null && !songIdsList.isEmpty()) {
+            // Initialize the media items list
+            mediaItems = new ArrayList<>();
+
+            // TODO: get songs from firebase or change sending items from activity
+            Song firstSong = new Song(songIdsList.get(0), "Don Omar", "Danza Kuduro", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
+            Song secondSong = new Song(songIdsList.get(1), "Akon", "Smack That", "Konvicted", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2FAkon%20-%20Smack%20That%20(Official%20Music%20Video)%20ft.%20Eminem.mp3?alt=media&token=f728aafc-0cb6-4270-b07b-f3ec40abd347");
+            ArrayList<Song> newList = new ArrayList<>();
+            newList.add(firstSong);
+            newList.add(secondSong);
+
+            for (Song song : newList) {
+                MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                        .setMediaId(String.valueOf(song.getSongId()))
+                        // Other metadata can be set here like title, artist, etc.
+                        .setTitle(song.getTitle())
+                        .setSubtitle(song.getArtist())
+                        .setDescription(song.getAlbum())
+                        .setMediaUri(Uri.parse(song.getSongPath()))
+                        .build();
+
+                MediaBrowserCompat.MediaItem mediaItem = new MediaBrowserCompat.MediaItem(description,
+                        MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
+
+                // Add the media item to the list
+                mediaItems.add(mediaItem);
+            }
+
+            // Indicate that the media items are ready
+            mediaItemsAreReady = true;
+            // Send the result to the connected MediaBrowser
+            result.sendResult(mediaItems);
+        } else {
+            result.sendResult(null);
+        }
     }
 
     private void play() {
         PlaybackStateCompat pbStateCompat = mediaController.getPlaybackState();
-        if (pbStateCompat.getState() == PlaybackStateCompat.STATE_PAUSED || pbStateCompat.getState() == PlaybackStateCompat.STATE_NONE) {
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioAttributes(
+                    new AudioAttributes.Builder()
+                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                            .build()
+            );
+            try {
+                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
+                mediaPlayer.prepareAsync();
+                mediaPlayer.setOnPreparedListener(mp -> {
+                    metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration());
+                    mediaSession.setMetadata(metadataBuilder.build());
+                    mediaPlayer.start();
+                    updatePlaybackState(PlaybackStateCompat.ACTION_PLAY);
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            mediaPlayer.setOnCompletionListener(mp -> {
+                // handle completion of a track
+                skipToNext();
+            });
+
+        } else if (pbStateCompat.getState() == PlaybackStateCompat.STATE_PAUSED || pbStateCompat.getState() == PlaybackStateCompat.STATE_NONE) {
             mediaPlayer.start();
             updatePlaybackState(PlaybackStateCompat.ACTION_PLAY);
         }
@@ -316,7 +413,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
         } else if (action == PlaybackStateCompat.ACTION_PAUSE) {
             stateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, mediaPlayer.getCurrentPosition(), 1, SystemClock.elapsedRealtime());
         } else if (action == PlaybackStateCompat.ACTION_STOP) {
-            stateBuilder.setState(PlaybackStateCompat.STATE_STOPPED, mediaPlayer.getCurrentPosition(), 1, SystemClock.elapsedRealtime());
+            stateBuilder.setState(PlaybackStateCompat.STATE_STOPPED, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1, SystemClock.elapsedRealtime());
         } else if (action == PlaybackStateCompat.ACTION_SKIP_TO_NEXT) {
             stateBuilder.setState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, mediaPlayer.getCurrentPosition(), 1, SystemClock.elapsedRealtime());
         } else if (action == PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) {
