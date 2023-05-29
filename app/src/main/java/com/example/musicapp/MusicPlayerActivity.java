@@ -13,6 +13,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.widget.Button;
 import android.widget.SeekBar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
@@ -115,7 +116,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
         songBundle.putIntegerArrayList("songList", songList);
         mediaBrowser.subscribe("media", songBundle, new MediaBrowserCompat.SubscriptionCallback() {
             @Override
-            public void onChildrenLoaded(String parentId, List<MediaBrowserCompat.MediaItem> children) {
+            public void onChildrenLoaded(@NonNull String parentId, @NonNull List<MediaBrowserCompat.MediaItem> children) {
                 super.onChildrenLoaded(parentId, children);
             }
         });
@@ -177,7 +178,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
 
             elapsedTimeView.setText(elapsedTimeString);
             durationView.setText(durationString);
-            
+
             mHandler.post(mUpdateElapsedTimeRunnable);
         }
 

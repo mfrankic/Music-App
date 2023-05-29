@@ -1,7 +1,6 @@
 package com.example.musicapp;
 
 import android.app.ActivityOptions;
-import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -15,8 +14,6 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -45,12 +42,14 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
     private SharedPreferences.OnSharedPreferenceChangeListener sharedPrefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-            if (prefs.getBoolean("isArtist", false)){
+            if (prefs.getBoolean("isArtist", false)) {
                 uploadButtonItem.setVisibility(View.VISIBLE);
-            }else {
+            } else {
                 uploadButtonItem.setVisibility(View.GONE);
             }
-        }};
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,57 +107,27 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         uploadButtonItem = bottomNavigationView.findViewById(R.id.upload_song_button);
 
         DocumentReference userDoc = db.collection("users").document(auth.getUid());
-        userDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        String isArtistString = String.valueOf(document.get("isArtist"));
-                        isArtist = Boolean.valueOf(isArtistString);
-                        editor.putBoolean("isArtist", isArtist);
-                        editor.apply();
-                        if (!isArtist){
-                            uploadButtonItem.setVisibility(View.GONE);
-                        }else{
-                            uploadButtonItem.setVisibility(View.VISIBLE);
-                        }
-                        Log.d("artcheck", "DocumentSnapshot data: " + isArtist);
+        userDoc.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    String isArtistString = String.valueOf(document.get("isArtist"));
+                    isArtist = Boolean.valueOf(isArtistString);
+                    editor.putBoolean("isArtist", isArtist);
+                    editor.apply();
+                    if (!isArtist) {
+                        uploadButtonItem.setVisibility(View.GONE);
                     } else {
-                        Log.d("artcheck", "No such document");
+                        uploadButtonItem.setVisibility(View.VISIBLE);
                     }
+                    Log.d("artcheck", "DocumentSnapshot data: " + isArtist);
                 } else {
-                    Log.d("artcheck", "get failed with ", task.getException());
+                    Log.d("artcheck", "No such document");
                 }
+            } else {
+                Log.d("artcheck", "get failed with ", task.getException());
             }
         });
-
-
-
-
-        /*test
-        // Create a new user with a first and last name
-        Map<String, Object> user = new HashMap<>();
-        user.put("first", "Ada");
-        user.put("last", "Lovelace");
-        user.put("born", 1815);
-
-        // Add a new document with a generated ID
-        db.collection("users")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("DB", "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("DB", "Error adding document", e);
-                    }
-                });
-         */
     }
 
     @Override
@@ -205,12 +174,12 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         return false;
     }
 
-    public void isArtistChange(){
+    public void isArtistChange() {
         isArtist = sharedPreferences.getBoolean("isArtist", false);
 
-        if (isArtist){
+        if (isArtist) {
             uploadButtonItem.setVisibility(View.VISIBLE);
-        }else {
+        } else {
             uploadButtonItem.setVisibility(View.GONE);
         }
 

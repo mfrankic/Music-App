@@ -188,7 +188,9 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
             mediaPlayer.prepareAsync();
             mediaPlayer.setOnPreparedListener(mp -> {
-                metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration());
+                metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration())
+                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, (String) mediaItems.get(mCurrentSongIndex).getDescription().getTitle())
+                        .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, (String) mediaItems.get(mCurrentSongIndex).getDescription().getSubtitle());
                 mediaSession.setMetadata(metadataBuilder.build());
             });
         } catch (IOException e) {
@@ -265,7 +267,6 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             for (TempSong song : newList) {
                 MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                         .setMediaId(String.valueOf(song.getSongId()))
-                        // Other metadata can be set here like title, artist, etc.
                         .setTitle(song.getSongName())
                         .setSubtitle(song.getArtistName())
                         .setDescription(song.getAlbumName())
@@ -277,6 +278,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
 
                 // Add the media item to the list
                 mediaItems.add(mediaItem);
+
             }
 
             // Indicate that the media items are ready
@@ -302,7 +304,9 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                 mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
                 mediaPlayer.prepareAsync();
                 mediaPlayer.setOnPreparedListener(mp -> {
-                    metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration());
+                    metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration())
+                            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, (String) mediaItems.get(mCurrentSongIndex).getDescription().getTitle())
+                            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, (String) mediaItems.get(mCurrentSongIndex).getDescription().getSubtitle());
                     mediaSession.setMetadata(metadataBuilder.build());
                     mediaPlayer.start();
                     updatePlaybackState(PlaybackStateCompat.ACTION_PLAY);
@@ -367,8 +371,8 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private Notification getNotification() {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_foreground) // replace with your own icon
-                .setContentTitle("My Music Player") // replace with dynamic title based on playing track
-                .setContentText("Now playing...") // replace with dynamic text based on playing track
+                .setContentTitle(mediaController.getMetadata().getString(MediaMetadataCompat.METADATA_KEY_TITLE)) // replace with dynamic title based on playing track
+                .setContentText(mediaController.getMetadata().getString(MediaMetadataCompat.METADATA_KEY_ARTIST)) // replace with dynamic text based on playing track
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.playlist_image)) // replace with dynamic album art
                 .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_STOP))
