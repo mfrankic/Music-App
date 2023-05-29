@@ -38,6 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
+        android:paddingBottom="60dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <!-- Body section of the main activity -->
@@ -45,7 +46,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="14dp">
+            android:paddingHorizontal="14dp"
+            android:paddingBottom="60dp">
 
             <TextView
                 android:id="@+id/settings_text_name"
@@ -86,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textSize="18sp"
-                    android:paddingLeft="10dp"/>
+                    android:paddingLeft="10dp" />
 
             </LinearLayout>
 
@@ -105,7 +107,6 @@
                     app:switchPadding="14dp" />
 
             </LinearLayout>
-
 
 
             <com.google.android.material.switchmaterial.SwitchMaterial

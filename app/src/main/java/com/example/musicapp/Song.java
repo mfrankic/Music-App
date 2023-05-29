@@ -27,14 +27,6 @@ public class Song {
         this.albumName = albumName;
     }
 
-
-
-
-
-
-
-
-
     public String getAlbumUUDI() {
         return albumUUDI;
     }
