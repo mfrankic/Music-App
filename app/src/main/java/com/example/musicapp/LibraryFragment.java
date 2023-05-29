@@ -1,0 +1,351 @@
+package com.example.musicapp;
+
+import static java.sql.Types.TIMESTAMP;
+
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.type.DateTime;
+
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+public class LibraryFragment extends Fragment {
+
+    private  FirebaseFirestore db;
+    private Map<String, String> usersSongCollRef;
+    ArrayList<Song> allSongs, artistSongs, genreSongs, releaseYearSongs;
+    ArrayList<Album> allAlbums;
+    ArrayList<String> allArtists;
+    RecyclerView allSongsView;
+    LinearLayoutManager allSongsViewManager;
+    SongsViewAdapter songsViewAdapter;
+    Spinner filterBySpinner, filterSpinner;
+    ArrayAdapter<String> filterByAdapter, filterAdapter;
+    ArrayList<String> allReleaseYears;
+    Button filterBtn;
+    String selectedItem;
+    Integer counter;
+    public LibraryFragment() {
+        // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_library, container, false);
+    }
+
+
+   AdapterView.OnItemSelectedListener filterBySpinnerListener =  new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            selectedItem = (String) parent.getItemAtPosition(position);
+            // Perform actions based on the selected item
+
+            // Example: Show the second spinner when "Genre" is selected
+            if (selectedItem.equals("Genre")) {
+                String[] entries = getResources().getStringArray(R.array.genre_array);
+                filterAdapter.clear();
+                filterAdapter.addAll(entries);
+                filterAdapter.notifyDataSetChanged();
+            } else if (selectedItem.equals("Artist")){
+                Log.d("promjena", allArtists.toString());
+                filterAdapter.clear();
+                filterAdapter.addAll(allArtists);
+                filterAdapter.notifyDataSetChanged();
+            } else if (selectedItem.equals("Release year")) {
+                Log.d("godine", allReleaseYears.toString());
+                filterAdapter.clear();
+                filterAdapter.addAll(allReleaseYears);
+                filterAdapter.notifyDataSetChanged();
+            }
+        }
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+            // Handle case when no item is selected
+        }
+    };
+
+    private void getAllReleaseYears(){
+        allReleaseYears = new ArrayList<>();
+        for(Album album: allAlbums){
+            Timestamp timestamp = album.getReleaseDate();
+            Date date = new Date();
+            date.setTime(timestamp.getTime());
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
+            String releaseYear = simpleDateFormat.format(calendar.getTime()).toString();
+
+
+            if(!allReleaseYears.contains(releaseYear)){
+                allReleaseYears.add(releaseYear);
+            }
+        }
+    }
+    private void getAllArtists(){
+        for (Song song: allSongs){
+            if(!allArtists.contains(song.getArtistName())){
+                allArtists.add(song.getArtistName());
+            }
+        }
+        ArrayList<String> allArtistsCopy = new ArrayList<>(allArtists);
+
+        filterAdapter  = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, allArtistsCopy);
+        filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        filterSpinner.setAdapter(filterAdapter);
+
+        filterBySpinner.setOnItemSelectedListener(filterBySpinnerListener);
+
+    }
+    private void   updateSongsWithAlbumData(){
+        counter += 1;
+        Log.d("songsPrint", allAlbums.toString());
+        for(Song song: allSongs){
+            String songAlbumID = song.getAlbumUUDI();
+            for (Album album: allAlbums){
+                if(album.getAlbumID().equals(songAlbumID)){
+                    song.setAlbumName(album.getAlbumName());
+                    song.setReleaseDate(album.getReleaseDate());
+                    Log.d("songAlbum", songAlbumID + "  "+ album.getAlbumID());
+                    Log.d("songAlbum", song.getReleaseDate().toString());
+                }
+            }
+
+        }
+
+    }
+
+    private void getAlbumData(){
+        CollectionReference albums = db.collection("albums/");
+        albums.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Object timestampObject = document.get("releaseDate");
+                        com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) timestampObject;
+                        long timestampMillis = timestamp.toDate().getTime();
+                        Timestamp releaseDate = new Timestamp(timestamp.toDate().getTime());
+                        // Use the timestampMillis as needed
+                        Log.d("vreme", String.valueOf(releaseDate));
+
+                        Album album = new Album();
+                        album.setAlbumName(document.get("albumName").toString());
+                        album.setReleaseDate(releaseDate);
+                        album.setAlbumID(document.getId().toString());
+                        allAlbums.add(album);
+
+                    }
+
+                } else {
+                    Log.d("allSongs", "Error getting documents: ", task.getException());
+                }
+                //updateSongsWithAlbumData();
+                getAllReleaseYears();
+            }
+        });
+    }
+
+
+    private void getSongsDocuments(){
+        Log.d("allSongs", usersSongCollRef.toString());
+
+        for(Map.Entry<String, String> entry: usersSongCollRef.entrySet()){
+            CollectionReference userSongColl = db.collection("users/" + entry.getKey() + "/songs");
+            Log.d("allSongs", "looking for user: " + entry.getKey());
+
+
+            userSongColl.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Log.d("allSongs", document.getId() + " => " + document.getData());
+
+                            Song song = new Song();
+                            song.setAlbumUUDI(document.getString("album"));
+                            song.setGenre(document.getString("genre"));
+                            song.setSongName(document.getString("songName"));
+                            song.setSongFileUUID(document.getString("songUUID"));
+                            song.setArtistName(entry.getValue());
+                            song.setArtistID(entry.getKey());
+                            Log.d("pesma", song.toString());
+
+                            allSongs.add(song);
+                        }
+                    } else {
+                        Log.d("allSongs", "Error getting documents: ", task.getException());
+                    }
+
+                    // Finally pass songs to adapter to show them in recycle view
+                    setAllSongsAdapter(allSongs);
+                    getAlbumData();
+                    getAllArtists();
+                    //getAllReleaseYears();
+
+                }
+            });
+        }
+
+        //getAlbumData();
+    }
+    private void  getAllSongs(){
+        usersSongCollRef = new HashMap<String, String>();
+
+        // Users collection reference
+        CollectionReference usersCollRef = db.collection("users");
+
+        usersCollRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Log.d("allSongs", document.getId() + " => " + document.getData());
+                        usersSongCollRef.put(document.getId().toString(), document.getString("name"));
+                    }
+                    getSongsDocuments();
+                } else {
+                    Log.d("allSongs", "Error getting documents: ", task.getException());
+                }
+            }
+        });
+    }
+
+    private void setAllSongsAdapter(ArrayList<Song> songs){
+        songsViewAdapter = new SongsViewAdapter(getContext(), songs);
+        allSongsView.setAdapter(songsViewAdapter);
+    }
+
+    private void getSongsByArtist(String artistName){
+        artistSongs = new ArrayList<>();
+        for(Song song: allSongs){
+            if(song.getArtistName().equals(artistName)){
+                artistSongs.add(song);
+            }
+        }
+    }
+
+    private void getSongsByGenre(String genre){
+        genreSongs = new ArrayList<>();
+        for(Song song: allSongs){
+            if(song.getGenre().equals(genre)){
+                genreSongs.add(song);
+            }
+        }
+    }
+
+    private void getSongsByYear(String year){
+        releaseYearSongs = new ArrayList<>();
+        for(Song song: allSongs){
+
+            if(song.getReleaseDate() != null){
+                Timestamp timestamp = song.getReleaseDate();
+                Date date = new Date();
+                date.setTime(timestamp.getTime());
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
+                String releaseYear = simpleDateFormat.format(calendar.getTime()).toString();
+                Log.d("byyear", song.getReleaseDate().toString());
+
+                if(releaseYear.equals(year)) {
+                    releaseYearSongs.add(song);
+                }
+            }
+        }
+        Log.d("byyear", String.valueOf(allSongs.size()));
+
+    }
+
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        MainActivity activity = (MainActivity) getActivity();
+        assert activity != null;
+
+        counter = 0;
+
+        db = FirebaseFirestore.getInstance();
+        allSongs = new ArrayList<>();
+        allAlbums = new ArrayList<>();
+        allArtists = new ArrayList<>();
+
+
+        filterBySpinner = view.findViewById(R.id.filterBySpinner);
+        filterSpinner = view.findViewById(R.id.filterSpinner);
+        filterBtn = view.findViewById(R.id.filter_button);
+
+        filterBtn.setOnClickListener(v ->{
+            if(filterBySpinner.getSelectedItem().toString().equals("Artist")){
+                String selectedArtist = filterSpinner.getSelectedItem().toString();
+                getSongsByArtist(selectedArtist);
+                Log.d("byartist", artistSongs.toString());
+                setAllSongsAdapter(artistSongs);
+            }else if (filterBySpinner.getSelectedItem().toString().equals("Genre")){
+                String selectedGenre = filterSpinner.getSelectedItem().toString();
+                getSongsByGenre(selectedGenre);
+                setAllSongsAdapter(genreSongs);
+            }else if (filterBySpinner.getSelectedItem().toString().equals("Release year")){
+                String selectedYear = filterSpinner.getSelectedItem().toString();
+                updateSongsWithAlbumData();
+                getSongsByYear(selectedYear);
+                setAllSongsAdapter(releaseYearSongs);
+                Log.d("byartist", allSongs.toString());
+            }
+
+        });
+
+
+
+
+
+        allSongsView = view.findViewById(R.id.all_songs_view);
+        allSongsViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        allSongsView.setLayoutManager(allSongsViewManager);
+
+        getAllSongs();
+
+
+
+    }
+
+}

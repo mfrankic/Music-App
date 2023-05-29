@@ -1,37 +1,92 @@
 package com.example.musicapp;
 
+import java.sql.Timestamp;
+
 public class Song {
-    private int songId;
-    private String title;
-    private String artist;
-    private String album;
-    private String songPath;
 
-    public Song(int songId, String title, String artist, String album, String songPath) {
-        this.songId = songId;
-        this.title = title;
-        this.artist = artist;
-        this.album = album;
-        this.songPath = songPath;
+    private String songName, artistName, songFileUUID, genre, artistID, albumUUDI, albumName;
+    private Timestamp releaseDate;
+
+    public Song() {
+
     }
 
-    public int getSongId() {
-        return songId;
+    public Timestamp getReleaseDate() {
+        return releaseDate;
     }
 
-    public String getTitle() {
-        return title;
+    public void setReleaseDate(Timestamp releaseDate) {
+        this.releaseDate = releaseDate;
     }
 
-    public String getArtist() {
-        return artist;
+    public String getAlbumName() {
+        return albumName;
     }
 
-    public String getAlbum() {
-        return album;
+    public void setAlbumName(String albumName) {
+        this.albumName = albumName;
     }
 
-    public String getSongPath() {
-        return songPath;
+    public String getAlbumUUDI() {
+        return albumUUDI;
+    }
+
+    public void setAlbumUUDI(String albumUUDI) {
+        this.albumUUDI = albumUUDI;
+    }
+
+    public String getSongName() {
+        return songName;
+    }
+
+    public void setSongName(String songName) {
+        this.songName = songName;
+    }
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
+
+    public String getSongFileUUID() {
+        return songFileUUID;
+    }
+
+    public void setSongFileUUID(String songFileUUID) {
+        this.songFileUUID = songFileUUID;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public String getArtistID() {
+        return artistID;
+    }
+
+    public void setArtistID(String artistID) {
+        this.artistID = artistID;
+    }
+
+    @Override
+    public String toString() {
+        return "Song{" +
+                "songName='" + songName + '\'' +
+                ", artistName='" + artistName + '\'' +
+                ", songFileUUID='" + songFileUUID + '\'' +
+                ", genre='" + genre + '\'' +
+                ", artistID='" + artistID + '\'' +
+                ", albumUUDI='" + albumUUDI + '\'' +
+  
+                ", albumName='" + albumName + '\'' +
+                ", releaseDate='" + releaseDate + '\'' +
+                '}';
     }
 }
