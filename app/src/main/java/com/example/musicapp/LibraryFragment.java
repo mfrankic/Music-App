@@ -45,9 +45,9 @@ public class LibraryFragment extends Fragment {
 
     private  FirebaseFirestore db;
     private Map<String, String> usersSongCollRef;
-    ArrayList<Song> allSongs, artistSongs, genreSongs, releaseYearSongs;
-    ArrayList<Album> allAlbums;
-    ArrayList<String> allArtists;
+    public ArrayList<Song> allSongs, artistSongs, genreSongs, releaseYearSongs;
+    public ArrayList<Album> allAlbums;
+    public ArrayList<String> allArtists;
     RecyclerView allSongsView;
     LinearLayoutManager allSongsViewManager;
     SongsViewAdapter songsViewAdapter;
@@ -353,4 +353,11 @@ public class LibraryFragment extends Fragment {
 
     }
 
+    public ArrayList<Song> getAllSongsGetter() {
+        return allSongs;
+    }
+
+    public ArrayList<Album> getAllAlbumsGetter() {
+        return allAlbums;
+    }
 }

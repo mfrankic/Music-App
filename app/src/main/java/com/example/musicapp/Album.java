@@ -43,4 +43,24 @@ public class Album {
                 ", albumID='" + albumID + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Album other = (Album) obj;
+        return this.getAlbumID() == other.getAlbumID() && this.getAlbumName().equals(other.getAlbumName());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + albumID.hashCode();
+        result = 31 * result + albumName.hashCode();
+        return result;
+    }
 }

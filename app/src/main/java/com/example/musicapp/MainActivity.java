@@ -27,9 +27,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
     protected final HomeFragment homeFragment = new HomeFragment();
     protected final UploadSongFragment uploadSongFragment = new UploadSongFragment();
-
+    protected final SearchFragment searchFragment = new SearchFragment();
     protected final SettingsFragment settingsFragment = new SettingsFragment();
-    protected final LibraryFragment libraryFragment = new LibraryFragment();
+    public final LibraryFragment libraryFragment = new LibraryFragment();
 
     private View uploadButtonItem;
 
@@ -161,6 +161,10 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             return true;
         } else if (itemId == R.id.search_button) {
             Log.d("MainActivity", "Search button clicked");
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_fragment_container, searchFragment)
+                    .commit();
             return true;
         } else if (itemId == R.id.library_button) {
             getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, libraryFragment).commit();
