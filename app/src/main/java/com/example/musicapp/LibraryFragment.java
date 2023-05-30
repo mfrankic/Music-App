@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -335,7 +336,11 @@ public class LibraryFragment extends Fragment {
         });
 
 
-
+        filterBtn.setOnLongClickListener(v -> {
+            setAllSongsAdapter(allSongs);
+            Toast.makeText(getContext(), "All songs are displayed", Toast.LENGTH_SHORT).show();
+            return true;
+        });
 
 
         allSongsView = view.findViewById(R.id.all_songs_view);
