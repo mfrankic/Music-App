@@ -1,12 +1,15 @@
 package com.example.musicapp;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -47,6 +50,9 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private boolean isBuffering = false;
     private int lastMediaState = PlaybackStateCompat.STATE_NONE;
 
+    private Notification notificationTest;
+    private NotificationChannel channel;
+    private NotificationManager notificationManager;
     private static boolean isRunning = false;
 
     public static boolean isRunning() {
@@ -135,6 +141,8 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                 return super.onMediaButtonEvent(mediaButtonEvent);
             }
         });
+
+
     }
 
     @Override
@@ -443,7 +451,23 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
 
         if (action != PlaybackStateCompat.ACTION_STOP) {
             // Now that the state is updated, notify the service to become active
-            startForeground(NOTIFICATION_ID, getNotification());
+            //startForeground(NOTIFICATION_ID, getNotification());
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                CharSequence name = "musicKanal";
+                String description = "kanal za glazbu";
+                int importance = NotificationManager.IMPORTANCE_DEFAULT;
+                channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
+                channel.setDescription(description);
+                // Register the channel with the system. You can't change the importance
+                // or other notification behaviors after this.
+                notificationManager = getSystemService(NotificationManager.class);
+                notificationManager.createNotificationChannel(channel);
+            }
+
+
+            notificationTest = getNotification();
+            startForeground(NOTIFICATION_ID, notificationTest);
         } else {
             stopForeground(true);
         }
