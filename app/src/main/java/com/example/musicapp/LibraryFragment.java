@@ -2,7 +2,9 @@ package com.example.musicapp;
 
 import static java.sql.Types.TIMESTAMP;
 
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +23,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -28,6 +32,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.type.DateTime;
 
 import java.sql.Time;
@@ -57,6 +63,11 @@ public class LibraryFragment extends Fragment {
     Button filterBtn;
     String selectedItem;
     Integer counter;
+    int numOfFetchedURLs;
+    private  FirebaseStorage storage;
+    private  StorageReference storageRef;
+
+
     public LibraryFragment() {
         // Required empty public constructor
     }
@@ -180,6 +191,7 @@ public class LibraryFragment extends Fragment {
                     Log.d("allSongs", "Error getting documents: ", task.getException());
                 }
                 //updateSongsWithAlbumData();
+                DataSingleton.getDataSingleton().setAllSongs(allSongs);
                 getAllReleaseYears();
             }
         });
@@ -208,6 +220,7 @@ public class LibraryFragment extends Fragment {
                             song.setSongFileUUID(document.getString("songUUID"));
                             song.setArtistName(entry.getValue());
                             song.setArtistID(entry.getKey());
+                            //song.setSongPath(document.get);
                             Log.d("pesma", song.toString());
 
                             allSongs.add(song);
@@ -220,6 +233,8 @@ public class LibraryFragment extends Fragment {
                     setAllSongsAdapter(allSongs);
                     getAlbumData();
                     getAllArtists();
+                    getSongsURL();
+
                     //getAllReleaseYears();
 
                 }
@@ -228,6 +243,41 @@ public class LibraryFragment extends Fragment {
 
         //getAlbumData();
     }
+
+    private  void  getSongsURL() {
+
+
+        for (Song song : allSongs) {
+            try {
+                StorageReference songRef = storageRef.child("/" + "songs/" + song.getSongFileUUID() + ".mp3");
+
+                songRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri downloadUrl) {
+
+                        //Log.d("URLgetzika", song.getSongPath());
+                        if(song.getSongPath() == null){
+                            song.setSongPath(downloadUrl.toString());
+                            numOfFetchedURLs += 1;
+                        }
+                        DataSingleton.getDataSingleton().setNumOfFetchedURLs(numOfFetchedURLs);
+                        Log.d("URLgetzika", String.valueOf(DataSingleton.getDataSingleton().getNumOfFetchedURLs()));
+                    }
+
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+
     private void  getAllSongs(){
         usersSongCollRef = new HashMap<String, String>();
 
@@ -306,6 +356,9 @@ public class LibraryFragment extends Fragment {
         counter = 0;
 
         db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
+
         allSongs = new ArrayList<>();
         allAlbums = new ArrayList<>();
         allArtists = new ArrayList<>();
@@ -347,6 +400,7 @@ public class LibraryFragment extends Fragment {
         allSongsViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         allSongsView.setLayoutManager(allSongsViewManager);
 
+        numOfFetchedURLs = 0;
         getAllSongs();
 
 
@@ -359,5 +413,9 @@ public class LibraryFragment extends Fragment {
 
     public ArrayList<Album> getAllAlbumsGetter() {
         return allAlbums;
+    }
+
+    public int getNumOfFetchedURLs() {
+        return numOfFetchedURLs;
     }
 }

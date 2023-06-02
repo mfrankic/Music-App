@@ -14,12 +14,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.provider.ContactsContract;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -54,7 +56,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private NotificationChannel channel;
     private NotificationManager notificationManager;
     private static boolean isRunning = false;
-
+    private ArrayList<Song> allSongs;
     public static boolean isRunning() {
         return isRunning;
     }
@@ -63,6 +65,9 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     public void onCreate() {
         super.onCreate();
         isRunning = true;
+
+        allSongs = DataSingleton.getDataSingleton().getAllSongs();
+        Log.d("servis", allSongs.toString());
 
         mediaSession = new MediaSessionCompat(this, "MyMusicService");
         mediaSession.setMediaButtonReceiver(null);
@@ -265,32 +270,52 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             mediaItems = new ArrayList<>();
 
             // TODO: get songs from firebase or change sending items from activity
-            TempSong firstSong = new TempSong(songIdsList.get(0), "Don Omar", "Danza Kuduro", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
+            TempSong firstSong = new TempSong(songIdsList.get(0), "Don Omar", "Danza", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
             TempSong secondSong = new TempSong(songIdsList.get(1), "Akon", "Smack That", "Konvicted", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2FAkon%20-%20Smack%20That%20(Official%20Music%20Video)%20ft.%20Eminem.mp3?alt=media&token=f728aafc-0cb6-4270-b07b-f3ec40abd347");
 
             ArrayList<TempSong> newList = new ArrayList<>();
             newList.add(firstSong);
             newList.add(secondSong);
 
-            for (TempSong song : newList) {
-                MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
-                        .setMediaId(String.valueOf(song.getSongId()))
-                        .setTitle(song.getSongName())
-                        .setSubtitle(song.getArtistName())
-                        .setDescription(song.getAlbumName())
-                        .setMediaUri(Uri.parse(song.getSongPath()))
-                        .build();
 
-                MediaBrowserCompat.MediaItem mediaItem = new MediaBrowserCompat.MediaItem(description,
-                        MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
 
-                // Add the media item to the list
-                mediaItems.add(mediaItem);
+            /*
+            int count = 0;
+            while (count < DataSingleton.getDataSingleton().getSongsCount()){
+                count = DataSingleton.getDataSingleton().getNumOfFetchedURLs();
+                Log.d("zika", String.valueOf(count) + " " + String.valueOf(DataSingleton.getDataSingleton().getSongsCount()));
+            }
+            */
+            allSongs = DataSingleton.getDataSingleton().getAllSongs();
+            Log.d("duljina", String.valueOf(allSongs.size()));
+            songList.clear();
+
+            for (Song song: allSongs) {
+                if(song.getSongPath() != null) {
+                    Log.d("zika", song.getSongPath());
+                    MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                            .setMediaId(String.valueOf(song.getSongFileUUID()))
+                            .setTitle(song.getSongName())
+                            .setSubtitle(song.getArtistName())
+                            .setDescription(song.getAlbumName())
+                            .setMediaUri(Uri.parse(song.getSongPath()))
+                            .build();
+
+                    Log.d("zika", "ne radi" + String.valueOf(description.getMediaUri()));
+
+                    MediaBrowserCompat.MediaItem mediaItem = new MediaBrowserCompat.MediaItem(description,
+                            MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
+
+                    // Add the media item to the list
+                    songList.add(song.getSongPath());
+                    mediaItems.add(mediaItem);
+                }
 
             }
 
             // Indicate that the media items are ready
             mediaItemsAreReady = true;
+            Log.d("zika", mediaItems.toString());
             // Send the result to the connected MediaBrowser
             result.sendResult(mediaItems);
         } else {
@@ -309,7 +334,8 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                             .build()
             );
             try {
-                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
+                //mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
+                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(allSongs.get(mCurrentSongIndex).getSongPath()));
                 mediaPlayer.prepareAsync();
                 mediaPlayer.setOnPreparedListener(mp -> {
                     metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration())
@@ -352,7 +378,8 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     }
 
     private void skipToNext() {
-        if (mediaPlayer != null && songList != null && mCurrentSongIndex < songList.size() - 1) {
+        //if (mediaPlayer != null && songList != null && mCurrentSongIndex < songList.size() - 1) {
+        if (mediaPlayer != null && allSongs != null && mCurrentSongIndex < allSongs.size() - 1) {
             mCurrentSongIndex++;
             stop();
             play();
