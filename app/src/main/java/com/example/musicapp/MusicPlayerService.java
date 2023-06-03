@@ -56,7 +56,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private NotificationChannel channel;
     private NotificationManager notificationManager;
     private static boolean isRunning = false;
-    private ArrayList<Song> allSongs;
+    private ArrayList<Song> songQueue;
     public static boolean isRunning() {
         return isRunning;
     }
@@ -66,8 +66,8 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
         super.onCreate();
         isRunning = true;
 
-        allSongs = DataSingleton.getDataSingleton().getAllSongs();
-        Log.d("servis", allSongs.toString());
+        songQueue = DataSingleton.getDataSingleton().getSongsQueue();
+        Log.d("servis", songQueue.toString());
 
         mediaSession = new MediaSessionCompat(this, "MyMusicService");
         mediaSession.setMediaButtonReceiver(null);
@@ -286,11 +286,11 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                 Log.d("zika", String.valueOf(count) + " " + String.valueOf(DataSingleton.getDataSingleton().getSongsCount()));
             }
             */
-            allSongs = DataSingleton.getDataSingleton().getAllSongs();
-            Log.d("duljina", String.valueOf(allSongs.size()));
+            songQueue = DataSingleton.getDataSingleton().getSongsQueue();
+            Log.d("duljina", String.valueOf(songQueue.size()));
             songList.clear();
 
-            for (Song song: allSongs) {
+            for (Song song: songQueue) {
                 if(song.getSongPath() != null) {
                     Log.d("zika", song.getSongPath());
                     MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
@@ -335,7 +335,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             );
             try {
                 //mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
-                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(allSongs.get(mCurrentSongIndex).getSongPath()));
+                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songQueue.get(mCurrentSongIndex).getSongPath()));
                 mediaPlayer.prepareAsync();
                 mediaPlayer.setOnPreparedListener(mp -> {
                     metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration())
@@ -379,7 +379,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
 
     private void skipToNext() {
         //if (mediaPlayer != null && songList != null && mCurrentSongIndex < songList.size() - 1) {
-        if (mediaPlayer != null && allSongs != null && mCurrentSongIndex < allSongs.size() - 1) {
+        if (mediaPlayer != null && songQueue != null && mCurrentSongIndex < songQueue.size() - 1) {
             mCurrentSongIndex++;
             stop();
             play();

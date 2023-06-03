@@ -17,8 +17,8 @@ public class DataSingleton {
 
     private static DataSingleton instance;
 
-    private static ArrayList<Song> allSongs;
-    private static ArrayList<String> allArtists;
+    private static ArrayList<Song> allSongs, songsQueue;
+    private static ArrayList<String> allArtists, songPaths;
     private static ArrayList<Album> allAlbums;
 
     private static int numOfFetchedURLs;
@@ -60,6 +60,23 @@ public class DataSingleton {
 
     public  void setAllAlbums(ArrayList<Album> allAlbums) {
         DataSingleton.allAlbums = allAlbums;
+    }
+
+    public  ArrayList<Song> getSongsQueue() {
+        return songsQueue;
+    }
+
+    public  void setSongsQueue(ArrayList<Song> songsQueue) {
+        DataSingleton.songsQueue = songsQueue;
+    }
+
+
+    public  ArrayList<String> getSongPaths() {
+        return songPaths;
+    }
+
+    public  void setSongPaths(ArrayList<String> songPaths) {
+        DataSingleton.songPaths = songPaths;
     }
 
     public int getSongsCount(){return allSongs.size();}
