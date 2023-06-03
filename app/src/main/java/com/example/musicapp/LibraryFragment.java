@@ -260,8 +260,8 @@ public class LibraryFragment extends Fragment {
                             song.setSongPath(downloadUrl.toString());
                             numOfFetchedURLs += 1;
                         }
-                        DataSingleton.getDataSingleton().setNumOfFetchedURLs(numOfFetchedURLs);
-                        Log.d("URLgetzika", String.valueOf(DataSingleton.getDataSingleton().getNumOfFetchedURLs()));
+                        //DataSingleton.getDataSingleton().setNumOfFetchedURLs(numOfFetchedURLs);
+                        //Log.d("URLgetzika", String.valueOf(DataSingleton.getDataSingleton().getNumOfFetchedURLs()));
                     }
 
                 }).addOnFailureListener(new OnFailureListener() {

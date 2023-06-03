@@ -3,10 +3,12 @@ package com.example.musicapp;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,13 +16,26 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
@@ -35,9 +50,19 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
     protected final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
+
     private boolean isArtist;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
+    public ArrayList<Song> allSongs, artistSongs, genreSongs, releaseYearSongs;
+    public ArrayList<Album> allAlbums;
+    public ArrayList<String> allArtists;
+    ArrayList<String> allReleaseYears;
+    private Map<String, String> usersSongCollRef;
+    boolean userIDsFetchfinished, songsFetchFinished, albumsFetchFinished;
+    private int numOfSongsFetched, numOfURLsFetched;
 
 
     private SharedPreferences.OnSharedPreferenceChangeListener sharedPrefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -129,8 +154,215 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 Log.d("artcheck", "get failed with ", task.getException());
             }
         });
+
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
+
+        getAllBackendData();
     }
 
+
+    private void  getUsersIDs(){
+        usersSongCollRef = new HashMap<String, String>();
+
+        // Users collection reference
+        CollectionReference usersCollRef = db.collection("users");
+
+        usersCollRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Log.d("allSongs", document.getId() + " => " + document.getData());
+                        usersSongCollRef.put(document.getId().toString(), document.getString("name"));
+                    }
+                    userIDsFetchfinished = true;
+                    getSongsDocuments();
+                } else {
+                    Log.d("allSongs", "Error getting documents: ", task.getException());
+                }
+            }
+        });
+    }
+
+
+    private void getSongsDocuments(){
+        Log.d("allSongs", usersSongCollRef.toString());
+        Log.d("brojPoziva", "POZIV");
+
+        for(Map.Entry<String, String> entry: usersSongCollRef.entrySet()){
+            CollectionReference userSongColl = db.collection("users/" + entry.getKey() + "/songs");
+            Log.d("allSongs", "looking for user: " + entry.getKey());
+
+
+            userSongColl.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Log.d("allSongs", document.getId() + " => " + document.getData());
+
+                            Song song = new Song();
+                            song.setAlbumUUDI(document.getString("album"));
+                            song.setGenre(document.getString("genre"));
+                            song.setSongName(document.getString("songName"));
+                            song.setSongFileUUID(document.getString("songUUID"));
+                            song.setArtistName(entry.getValue());
+                            song.setArtistID(entry.getKey());
+                            //song.setSongPath(document.get);
+                            Log.d("pesma", song.toString());
+
+                            allSongs.add(song);
+                        }
+                    } else {
+                        Log.d("allSongs", "Error getting documents: ", task.getException());
+                    }
+
+                    // Finally pass songs to adapter to show them in recycle view
+                    //setAllSongsAdapter(allSongs);
+                    /*
+                    getAlbumData();
+                    getAllArtists();
+                    getSongsURL();
+                    */
+                    //getAlbumData();
+
+                    numOfSongsFetched += 1;
+
+                    Log.d("allSongs", String.valueOf(numOfSongsFetched) + " " + String.valueOf(usersSongCollRef.size()));
+                    if(numOfSongsFetched == usersSongCollRef.size()){
+                        getAllArtists();
+                        updateSongsWithAlbumData();
+                        getSongsURL();
+                    }
+                }
+            });
+
+        }
+        //songsFetchFinished = true;
+        getAlbumData();
+    }
+
+    private void getAlbumData(){
+        CollectionReference albums = db.collection("albums/");
+        albums.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Object timestampObject = document.get("releaseDate");
+                        com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) timestampObject;
+                        long timestampMillis = timestamp.toDate().getTime();
+                        Timestamp releaseDate = new Timestamp(timestamp.toDate().getTime());
+                        // Use the timestampMillis as needed
+                        Log.d("vreme", String.valueOf(releaseDate));
+
+                        Album album = new Album();
+                        album.setAlbumName(document.get("albumName").toString());
+                        album.setReleaseDate(releaseDate);
+                        album.setAlbumID(document.getId().toString());
+                        allAlbums.add(album);
+
+                    }
+                    Log.d("allAlbums", allAlbums.toString());
+
+                } else {
+                    Log.d("allSongs", "Error getting documents: ", task.getException());
+                }
+                //updateSongsWithAlbumData();
+                //DataSingleton.getDataSingleton().setAllSongs(allSongs);
+
+                // ovo se zove getAllReleaseYears();
+                DataSingleton.getDataSingleton().setAllAlbums(allAlbums);
+            }
+        });
+    }
+    private void getAllArtists(){
+        for (Song song: allSongs){
+            if(!allArtists.contains(song.getArtistName())){
+                allArtists.add(song.getArtistName());
+            }
+        }
+        ArrayList<String> allArtistsCopy = new ArrayList<>(allArtists);
+        Log.d("allartists", allArtists.toString());
+        DataSingleton.getDataSingleton().setAllArtists(allArtists);
+    }
+    private void   updateSongsWithAlbumData(){
+        for(Song song: allSongs){
+            String songAlbumID = song.getAlbumUUDI();
+            for (Album album: allAlbums){
+                if(album.getAlbumID().equals(songAlbumID)){
+                    song.setAlbumName(album.getAlbumName());
+                    song.setReleaseDate(album.getReleaseDate());
+                    Log.d("songAlbum", songAlbumID + "  "+ album.getAlbumID());
+                    Log.d("songAlbum", song.getReleaseDate().toString());
+                }
+            }
+
+        }
+
+    }
+
+    private  void  getSongsURL() {
+
+
+        for (Song song : allSongs) {
+            try {
+                StorageReference songRef = storageRef.child("/" + "songs/" + song.getSongFileUUID() + ".mp3");
+
+                songRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri downloadUrl) {
+
+                        //Log.d("URLgetzika", song.getSongPath());
+                        if(song.getSongPath() == null){
+                            song.setSongPath(downloadUrl.toString());
+
+                        }
+                        Log.d("URLgetzika", String.valueOf(song.getSongPath()));
+                        Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
+                        numOfURLsFetched += 1;
+                        if(numOfURLsFetched == allSongs.size()){
+                            DataSingleton.getDataSingleton().setAllSongs(allSongs);
+                        }
+                        Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
+
+                    }
+
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        numOfURLsFetched += 1;
+                        if(numOfURLsFetched == allSongs.size()){
+                            DataSingleton.getDataSingleton().setAllSongs(allSongs);
+                        }
+                        e.printStackTrace();
+                    }
+                });
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+        }
+    }
+    public void getAllBackendData(){
+        allSongs = new ArrayList<>();
+        allAlbums = new ArrayList<>();
+        allArtists = new ArrayList<>();
+
+        userIDsFetchfinished = false;
+        songsFetchFinished = false;
+        albumsFetchFinished = false;
+
+        numOfSongsFetched = 0;
+        numOfURLsFetched = 0;
+
+        getUsersIDs();
+
+
+
+
+    }
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);

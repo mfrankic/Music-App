@@ -93,9 +93,9 @@ public class Song {
                 ", genre='" + genre + '\'' +
                 ", artistID='" + artistID + '\'' +
                 ", albumUUDI='" + albumUUDI + '\'' +
-  
                 ", albumName='" + albumName + '\'' +
-                ", releaseDate='" + releaseDate + '\'' +
+                ", songPath='" + songPath + '\'' +
+                ", releaseDate=" + releaseDate +
                 '}';
     }
 }

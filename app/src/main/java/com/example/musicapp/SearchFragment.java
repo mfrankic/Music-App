@@ -141,6 +141,8 @@ public class SearchFragment extends Fragment {
         });
 
 
+        Log.d("singleton", DataSingleton.getDataSingleton().getAllSongs().toString());
+
     }
 
 
