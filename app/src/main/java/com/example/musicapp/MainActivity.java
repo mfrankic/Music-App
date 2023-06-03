@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         // open music player when clicked on music player bar
         findViewById(R.id.music_player_bar).setOnClickListener(v -> {
-            DataSingleton.getDataSingleton().setAllSongs(libraryFragment.getAllSongsGetter());
+            //DataSingleton.getDataSingleton().setAllSongs(libraryFragment.getAllSongsGetter());
             Intent intent = new Intent(this, MusicPlayerActivity.class);
             ActivityOptions options = ActivityOptions.makeCustomAnimation(this, R.anim.slide_in_up, R.anim.fade_out);
             startActivity(intent, options.toBundle());
@@ -358,9 +358,6 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         numOfURLsFetched = 0;
 
         getUsersIDs();
-
-
-
 
     }
     @Override
