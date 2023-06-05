@@ -6,12 +6,13 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
     TextView songName;
     TextView artistName;
     String songFileUUID;
@@ -25,6 +26,7 @@ public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.On
         view  = itemView;
         this.context = context;
         itemView.setOnClickListener(this);
+        itemView.setOnLongClickListener(this);
     }
 
     @Override
@@ -42,6 +44,18 @@ public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.On
         Intent intent = new Intent(context, MusicPlayerActivity.class);
         ActivityOptions options = ActivityOptions.makeCustomAnimation(context, R.anim.slide_in_up, R.anim.fade_out);
         context.startActivity(intent, options.toBundle());
+    }
+
+    @Override
+    public boolean onLongClick(View v){
+        for(Song song: DataSingleton.getDataSingleton().getAllSongs()){
+            if(song.getSongFileUUID().equals(this.songFileUUID)){
+                DataSingleton.getDataSingleton().getSongsQueue().add(song);
+            }
+        }
+        Log.d("Songqueue", DataSingleton.getDataSingleton().getSongsQueue().toString());
+        Toast.makeText(context, "Added to playing queue", Toast.LENGTH_SHORT).show();
+        return true;
     }
 
     public String getSongFileUUID() {

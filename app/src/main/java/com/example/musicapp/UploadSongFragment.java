@@ -66,6 +66,7 @@ public class UploadSongFragment extends Fragment {
     private UUID uuidAlbum;
     private String uuidAlbumString;
     private TextView albumSelectLabel;
+    private MainActivity activity;
 
     public UploadSongFragment() {
         // Required empty public constructor
@@ -281,6 +282,7 @@ public class UploadSongFragment extends Fragment {
 
             //Make storage reference with uuid as the file name on the cloud
             StorageReference song = storageRef.child("songs/" + uuidString + ".mp3");
+            Toast.makeText(getContext(), "Song upload started", Toast.LENGTH_SHORT).show();
             //Uri file = Uri.fromFile(songFile);
             UploadTask uploadTask = song.putFile(uri);
             // Register observers to listen for when the download is done or if it fails
@@ -292,6 +294,7 @@ public class UploadSongFragment extends Fragment {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                 Log.d("TAG", "Upload successful");
                 Toast.makeText(getContext(), "Song uploaded successfully", Toast.LENGTH_SHORT).show();
+                activity.refreshBackendData();
             });
 
             // Update user document to reference the uploaded song

@@ -1,27 +1,22 @@
 package com.example.musicapp;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.provider.ContactsContract;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -52,11 +47,8 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private boolean isBuffering = false;
     private int lastMediaState = PlaybackStateCompat.STATE_NONE;
 
-    private Notification notificationTest;
-    private NotificationChannel channel;
-    private NotificationManager notificationManager;
     private static boolean isRunning = false;
-    private ArrayList<Song> songQueue;
+
     public static boolean isRunning() {
         return isRunning;
     }
@@ -65,9 +57,6 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     public void onCreate() {
         super.onCreate();
         isRunning = true;
-
-        songQueue = DataSingleton.getDataSingleton().getSongsQueue();
-        Log.d("servis", songQueue.toString());
 
         mediaSession = new MediaSessionCompat(this, "MyMusicService");
         mediaSession.setMediaButtonReceiver(null);
@@ -146,8 +135,6 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                 return super.onMediaButtonEvent(mediaButtonEvent);
             }
         });
-
-
     }
 
     @Override
@@ -270,52 +257,32 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             mediaItems = new ArrayList<>();
 
             // TODO: get songs from firebase or change sending items from activity
-            TempSong firstSong = new TempSong(songIdsList.get(0), "Don Omar", "Danza", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
+            TempSong firstSong = new TempSong(songIdsList.get(0), "Don Omar", "Danza Kuduro", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
             TempSong secondSong = new TempSong(songIdsList.get(1), "Akon", "Smack That", "Konvicted", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2FAkon%20-%20Smack%20That%20(Official%20Music%20Video)%20ft.%20Eminem.mp3?alt=media&token=f728aafc-0cb6-4270-b07b-f3ec40abd347");
 
             ArrayList<TempSong> newList = new ArrayList<>();
             newList.add(firstSong);
             newList.add(secondSong);
 
+            for (TempSong song : newList) {
+                MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                        .setMediaId(String.valueOf(song.getSongId()))
+                        .setTitle(song.getSongName())
+                        .setSubtitle(song.getArtistName())
+                        .setDescription(song.getAlbumName())
+                        .setMediaUri(Uri.parse(song.getSongPath()))
+                        .build();
 
+                MediaBrowserCompat.MediaItem mediaItem = new MediaBrowserCompat.MediaItem(description,
+                        MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
 
-            /*
-            int count = 0;
-            while (count < DataSingleton.getDataSingleton().getSongsCount()){
-                count = DataSingleton.getDataSingleton().getNumOfFetchedURLs();
-                Log.d("zika", String.valueOf(count) + " " + String.valueOf(DataSingleton.getDataSingleton().getSongsCount()));
-            }
-            */
-            songQueue = DataSingleton.getDataSingleton().getSongsQueue();
-            Log.d("duljina", String.valueOf(songQueue.size()));
-            songList.clear();
-
-            for (Song song: songQueue) {
-                if(song.getSongPath() != null) {
-                    Log.d("zika", song.getSongPath());
-                    MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
-                            .setMediaId(String.valueOf(song.getSongFileUUID()))
-                            .setTitle(song.getSongName())
-                            .setSubtitle(song.getArtistName())
-                            .setDescription(song.getAlbumName())
-                            .setMediaUri(Uri.parse(song.getSongPath()))
-                            .build();
-
-                    Log.d("zika", "ne radi" + String.valueOf(description.getMediaUri()));
-
-                    MediaBrowserCompat.MediaItem mediaItem = new MediaBrowserCompat.MediaItem(description,
-                            MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
-
-                    // Add the media item to the list
-                    songList.add(song.getSongPath());
-                    mediaItems.add(mediaItem);
-                }
+                // Add the media item to the list
+                mediaItems.add(mediaItem);
 
             }
 
             // Indicate that the media items are ready
             mediaItemsAreReady = true;
-            Log.d("zika", mediaItems.toString());
             // Send the result to the connected MediaBrowser
             result.sendResult(mediaItems);
         } else {
@@ -334,8 +301,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                             .build()
             );
             try {
-                //mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
-                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songQueue.get(mCurrentSongIndex).getSongPath()));
+                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
                 mediaPlayer.prepareAsync();
                 mediaPlayer.setOnPreparedListener(mp -> {
                     metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration())
@@ -378,8 +344,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     }
 
     private void skipToNext() {
-        //if (mediaPlayer != null && songList != null && mCurrentSongIndex < songList.size() - 1) {
-        if (mediaPlayer != null && songQueue != null && mCurrentSongIndex < songQueue.size() - 1) {
+        if (mediaPlayer != null && songList != null && mCurrentSongIndex < songList.size() - 1) {
             mCurrentSongIndex++;
             stop();
             play();
@@ -478,23 +443,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
 
         if (action != PlaybackStateCompat.ACTION_STOP) {
             // Now that the state is updated, notify the service to become active
-            //startForeground(NOTIFICATION_ID, getNotification());
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                CharSequence name = "musicKanal";
-                String description = "kanal za glazbu";
-                int importance = NotificationManager.IMPORTANCE_DEFAULT;
-                channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
-                channel.setDescription(description);
-                // Register the channel with the system. You can't change the importance
-                // or other notification behaviors after this.
-                notificationManager = getSystemService(NotificationManager.class);
-                notificationManager.createNotificationChannel(channel);
-            }
-
-
-            notificationTest = getNotification();
-            startForeground(NOTIFICATION_ID, notificationTest);
+            startForeground(NOTIFICATION_ID, getNotification());
         } else {
             stopForeground(true);
         }

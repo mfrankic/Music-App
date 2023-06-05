@@ -53,24 +53,10 @@ public class SearchFragment extends Fragment {
 
 
     private void searchSongs(String searchText){
-        ArrayList<Song> songs = activity.libraryFragment.getAllSongsGetter();
+        ArrayList<Song> songs = DataSingleton.getDataSingleton().getAllSongs();
 
-        ArrayList<Album> albumsWithDuplicates = activity.libraryFragment.getAllAlbumsGetter();
-        ArrayList<Album> albums = new ArrayList<>();
-        for(Album albumDuplicate: albumsWithDuplicates){
+        ArrayList<Album> albums = DataSingleton.getDataSingleton().getAllAlbums();
 
-            boolean exists = false;
-            for(Album album: albums){
-                if (albumDuplicate.getAlbumID().equals(album.getAlbumID())){
-                    exists = true;
-                }
-            }
-            if (exists == false){
-                albums.add(albumDuplicate);
-            }
-        }
-
-        Log.d("albumreg", String.valueOf(albums.size()));
 
 
         resultSearchElements = new ArrayList<>();
@@ -116,6 +102,7 @@ public class SearchFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
 
+        /*
         ArrayList<SearchElement> searchElements = new ArrayList<>();
         SearchElement searchElement = new SearchElement();
         searchElement.setElementName("Test");
@@ -125,12 +112,12 @@ public class SearchFragment extends Fragment {
         searchElement2.setElementType("album");
         searchElements.add(searchElement);
         searchElements.add(searchElement2);
-
+        */
         allSearchView = view.findViewById(R.id.search_songs_view);
         allSearchViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         allSearchView.setLayoutManager(allSearchViewManager);
 
-        setAllSearchViewAdapter(searchElements);
+        //setAllSearchViewAdapter(searchElements);
 
 
         searchText = view.findViewById(R.id.song_search);

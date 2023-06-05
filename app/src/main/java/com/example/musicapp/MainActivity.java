@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -324,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         numOfURLsFetched += 1;
                         if(numOfURLsFetched == allSongs.size()){
                             DataSingleton.getDataSingleton().setAllSongs(allSongs);
+                            Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
                         }
                         Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
 
@@ -335,6 +337,8 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         numOfURLsFetched += 1;
                         if(numOfURLsFetched == allSongs.size()){
                             DataSingleton.getDataSingleton().setAllSongs(allSongs);
+                            Toast.makeText(MainActivity.this, "Data load finished", Toast.LENGTH_SHORT).show();
+                            libraryFragment.dataUpdate();
                         }
                         e.printStackTrace();
                     }
@@ -359,6 +363,25 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         getUsersIDs();
 
+        Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_LONG).show();
+
+    }
+
+    public void refreshBackendData(){
+        allSongs = new ArrayList<>();
+        allAlbums = new ArrayList<>();
+        allArtists = new ArrayList<>();
+
+        userIDsFetchfinished = false;
+        songsFetchFinished = false;
+        albumsFetchFinished = false;
+
+        numOfSongsFetched = 0;
+        numOfURLsFetched = 0;
+
+        getUsersIDs();
+
+        Toast.makeText(MainActivity.this, "Data load started", Toast.LENGTH_LONG).show();
     }
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
