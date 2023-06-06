@@ -15,22 +15,26 @@ public class SongsViewAdapter extends RecyclerView.Adapter<SongsViewHolder>{
     Context context;
 
     List<Song> items;
+    MainActivity activity;
 
-    public SongsViewAdapter(Context context, List<Song> items) {
+    public SongsViewAdapter(Context context, List<Song> items, MainActivity activity) {
         this.context = context;
         this.items = items;
+        this.activity = activity;
     }
 
     @NonNull
     @Override
     public SongsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new SongsViewHolder(LayoutInflater.from(context).inflate(R.layout.all_songs_list_item, parent, false));
+        return new SongsViewHolder(LayoutInflater.from(context).inflate(R.layout.all_songs_list_item, parent, false), context, activity);
     }
 
     @Override
     public void onBindViewHolder(@NonNull SongsViewHolder holder, int position) {
         holder.songName.setText(items.get(position).getSongName());
         holder.artistName.setText(items.get(position).getArtistName());
+        holder.setSongFileUUID(items.get(position).getSongFileUUID());
+        holder.setArtistID(items.get(position).getArtistID());
     }
 
     @Override

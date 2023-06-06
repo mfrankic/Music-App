@@ -2,7 +2,9 @@ package com.example.musicapp;
 
 import static java.sql.Types.TIMESTAMP;
 
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,13 +15,17 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -27,6 +33,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.type.DateTime;
 
 import java.sql.Time;
@@ -44,9 +52,9 @@ public class LibraryFragment extends Fragment {
 
     private  FirebaseFirestore db;
     private Map<String, String> usersSongCollRef;
-    ArrayList<Song> allSongs, artistSongs, genreSongs, releaseYearSongs;
-    ArrayList<Album> allAlbums;
-    ArrayList<String> allArtists;
+    public ArrayList<Song> allSongs, artistSongs, genreSongs, releaseYearSongs;
+    public ArrayList<Album> allAlbums;
+    public ArrayList<String> allArtists;
     RecyclerView allSongsView;
     LinearLayoutManager allSongsViewManager;
     SongsViewAdapter songsViewAdapter;
@@ -56,6 +64,12 @@ public class LibraryFragment extends Fragment {
     Button filterBtn;
     String selectedItem;
     Integer counter;
+    int numOfFetchedURLs;
+    private  FirebaseStorage storage;
+    private  StorageReference storageRef;
+    MainActivity activity;
+
+
     public LibraryFragment() {
         // Required empty public constructor
     }
@@ -76,9 +90,7 @@ public class LibraryFragment extends Fragment {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             selectedItem = (String) parent.getItemAtPosition(position);
-            // Perform actions based on the selected item
 
-            // Example: Show the second spinner when "Genre" is selected
             if (selectedItem.equals("Genre")) {
                 String[] entries = getResources().getStringArray(R.array.genre_array);
                 filterAdapter.clear();
@@ -120,6 +132,7 @@ public class LibraryFragment extends Fragment {
             }
         }
     }
+    /*
     private void getAllArtists(){
         for (Song song: allSongs){
             if(!allArtists.contains(song.getArtistName())){
@@ -135,6 +148,10 @@ public class LibraryFragment extends Fragment {
         filterBySpinner.setOnItemSelectedListener(filterBySpinnerListener);
 
     }
+
+     */
+
+    /*
     private void   updateSongsWithAlbumData(){
         counter += 1;
         Log.d("songsPrint", allAlbums.toString());
@@ -153,6 +170,9 @@ public class LibraryFragment extends Fragment {
 
     }
 
+     */
+
+    /*
     private void getAlbumData(){
         CollectionReference albums = db.collection("albums/");
         albums.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -179,12 +199,14 @@ public class LibraryFragment extends Fragment {
                     Log.d("allSongs", "Error getting documents: ", task.getException());
                 }
                 //updateSongsWithAlbumData();
+                DataSingleton.getDataSingleton().setAllSongs(allSongs);
                 getAllReleaseYears();
             }
         });
     }
+     */
 
-
+    /*
     private void getSongsDocuments(){
         Log.d("allSongs", usersSongCollRef.toString());
 
@@ -207,6 +229,7 @@ public class LibraryFragment extends Fragment {
                             song.setSongFileUUID(document.getString("songUUID"));
                             song.setArtistName(entry.getValue());
                             song.setArtistID(entry.getKey());
+                            //song.setSongPath(document.get);
                             Log.d("pesma", song.toString());
 
                             allSongs.add(song);
@@ -219,6 +242,8 @@ public class LibraryFragment extends Fragment {
                     setAllSongsAdapter(allSongs);
                     getAlbumData();
                     getAllArtists();
+                    getSongsURL();
+
                     //getAllReleaseYears();
 
                 }
@@ -227,6 +252,46 @@ public class LibraryFragment extends Fragment {
 
         //getAlbumData();
     }
+     */
+
+    /*
+    private  void  getSongsURL() {
+
+
+        for (Song song : allSongs) {
+            try {
+                StorageReference songRef = storageRef.child("/" + "songs/" + song.getSongFileUUID() + ".mp3");
+
+                songRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri downloadUrl) {
+
+                        //Log.d("URLgetzika", song.getSongPath());
+                        if(song.getSongPath() == null){
+                            song.setSongPath(downloadUrl.toString());
+                            numOfFetchedURLs += 1;
+                        }
+                        //DataSingleton.getDataSingleton().setNumOfFetchedURLs(numOfFetchedURLs);
+                        //Log.d("URLgetzika", String.valueOf(DataSingleton.getDataSingleton().getNumOfFetchedURLs()));
+                    }
+
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+     */
+
+
+    /*
     private void  getAllSongs(){
         usersSongCollRef = new HashMap<String, String>();
 
@@ -248,9 +313,11 @@ public class LibraryFragment extends Fragment {
             }
         });
     }
+    */
+
 
     private void setAllSongsAdapter(ArrayList<Song> songs){
-        songsViewAdapter = new SongsViewAdapter(getContext(), songs);
+        songsViewAdapter = new SongsViewAdapter(getContext(), songs, activity );
         allSongsView.setAdapter(songsViewAdapter);
     }
 
@@ -297,17 +364,43 @@ public class LibraryFragment extends Fragment {
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        activity = (MainActivity) getActivity();
+        assert activity != null;
+
+        activity.isArtistChange();
         super.onViewCreated(view, savedInstanceState);
 
-        MainActivity activity = (MainActivity) getActivity();
-        assert activity != null;
+
+        AppCompatImageButton settingsButton = view.findViewById(R.id.settings_button);
+        settingsButton.setOnClickListener(v -> activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment_container, activity.settingsFragment)
+                .commit());
+
+        TextView greeting = view.findViewById(R.id.greeting_message);
+        greeting.setText("Hello " + DataSingleton.getDataSingleton().getCurrentUserName());
 
         counter = 0;
 
         db = FirebaseFirestore.getInstance();
-        allSongs = new ArrayList<>();
-        allAlbums = new ArrayList<>();
-        allArtists = new ArrayList<>();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
+
+
+        allSongs = DataSingleton.getDataSingleton().getAllSongs();
+        allAlbums = DataSingleton.getDataSingleton().getAllAlbums();
+        allArtists = DataSingleton.getDataSingleton().getAllArtists();
+        ArrayList<String> allArtistsCopy = new ArrayList<>(allArtists);
+
+        try {
+            Log.d("libsig", allSongs.toString());
+            Log.d("libsig", allAlbums.toString());
+            Log.d("libsig", allArtists.toString());
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        getAllReleaseYears();
 
 
         filterBySpinner = view.findViewById(R.id.filterBySpinner);
@@ -326,7 +419,7 @@ public class LibraryFragment extends Fragment {
                 setAllSongsAdapter(genreSongs);
             }else if (filterBySpinner.getSelectedItem().toString().equals("Release year")){
                 String selectedYear = filterSpinner.getSelectedItem().toString();
-                updateSongsWithAlbumData();
+                //updateSongsWithAlbumData();
                 getSongsByYear(selectedYear);
                 setAllSongsAdapter(releaseYearSongs);
                 Log.d("byartist", allSongs.toString());
@@ -335,17 +428,53 @@ public class LibraryFragment extends Fragment {
         });
 
 
-
+        filterBtn.setOnLongClickListener(v -> {
+            setAllSongsAdapter(allSongs);
+            Toast.makeText(getContext(), "All songs are displayed", Toast.LENGTH_SHORT).show();
+            return true;
+        });
 
 
         allSongsView = view.findViewById(R.id.all_songs_view);
         allSongsViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         allSongsView.setLayoutManager(allSongsViewManager);
+        setAllSongsAdapter(allSongs);
 
-        getAllSongs();
+
+
+        filterAdapter  = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, allArtistsCopy);
+        filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        filterSpinner.setAdapter(filterAdapter);
+
+        filterBySpinner.setOnItemSelectedListener(filterBySpinnerListener);
+
+        numOfFetchedURLs = 0;
+
+
+
 
 
 
     }
 
+    public ArrayList<Song> getAllSongsGetter() {
+        return allSongs;
+    }
+
+    public ArrayList<Album> getAllAlbumsGetter() {
+        return allAlbums;
+    }
+
+    public int getNumOfFetchedURLs() {
+        return numOfFetchedURLs;
+    }
+
+    public void dataUpdate(){
+        allSongs = DataSingleton.getDataSingleton().getAllSongs();
+        allAlbums = DataSingleton.getDataSingleton().getAllAlbums();
+        allArtists = DataSingleton.getDataSingleton().getAllArtists();
+        ArrayList<String> allArtistsCopy = new ArrayList<>(allArtists);
+        getAllReleaseYears();
+        setAllSongsAdapter(allSongs);
+    }
 }

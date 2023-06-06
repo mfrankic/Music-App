@@ -23,6 +23,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.Timestamp;
@@ -66,6 +67,7 @@ public class UploadSongFragment extends Fragment {
     private UUID uuidAlbum;
     private String uuidAlbumString;
     private TextView albumSelectLabel;
+    private MainActivity activity;
 
     public UploadSongFragment() {
         // Required empty public constructor
@@ -106,6 +108,8 @@ public class UploadSongFragment extends Fragment {
 
         MainActivity activity = (MainActivity) getActivity();
         assert activity != null;
+        activity.isArtistChange();
+
 
 
 
@@ -143,8 +147,12 @@ public class UploadSongFragment extends Fragment {
         albumsColl.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    albumList.add(document.getString("albumName"));
-                    albumListWithIDs.put(document.getString("albumName"), document.getId());
+                    Log.d("currentUserUp", DataSingleton.getDataSingleton().getCurrentUserID());
+                    if(document.getString("artistID").equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+                        albumList.add(document.getString("albumName"));
+                        albumListWithIDs.put(document.getString("albumName"), document.getId().toString());
+
+                    }
 
                     //Log.d(TAG, document.getId() + " => " + document.getData());
                 }
@@ -226,6 +234,7 @@ public class UploadSongFragment extends Fragment {
                     long time = date.getTime();
                     Timestamp timestamp = new Timestamp(date);
                     albumData.put("releaseDate", timestamp);
+                    albumData.put("artistID", DataSingleton.getDataSingleton().getCurrentUserID());
                     Log.d("date", dateString);
 
                 } catch (Exception e) {
@@ -250,8 +259,11 @@ public class UploadSongFragment extends Fragment {
                         albumList.clear();
                         albumListWithIDs.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            albumList.add(document.getString("albumName"));
-                            albumListWithIDs.put(document.getString("albumName"), document.getId().toString());
+                            if(document.getString("artistID").equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+                                albumList.add(document.getString("albumName"));
+                                albumListWithIDs.put(document.getString("albumName"), document.getId().toString());
+
+                            }
 
                             //Log.d(TAG, document.getId() + " => " + document.getData());
                         }
@@ -281,6 +293,7 @@ public class UploadSongFragment extends Fragment {
 
             //Make storage reference with uuid as the file name on the cloud
             StorageReference song = storageRef.child("songs/" + uuidString + ".mp3");
+            Toast.makeText(getContext(), "Song upload started", Toast.LENGTH_SHORT).show();
             //Uri file = Uri.fromFile(songFile);
             UploadTask uploadTask = song.putFile(uri);
             // Register observers to listen for when the download is done or if it fails
@@ -292,6 +305,8 @@ public class UploadSongFragment extends Fragment {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                 Log.d("TAG", "Upload successful");
                 Toast.makeText(getContext(), "Song uploaded successfully", Toast.LENGTH_SHORT).show();
+                activity.getAllBackendData();
+                updateAlbumSpinner();
             });
 
             // Update user document to reference the uploaded song
@@ -311,5 +326,34 @@ public class UploadSongFragment extends Fragment {
         });
 
 
+    }
+
+    private void updateAlbumSpinner(){
+        CollectionReference albumsColl = db.collection("albums");
+        ArrayList<String> albumList = new ArrayList<>();
+        Map<String, String> albumListWithIDs = new HashMap<>();
+        albumsColl.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    if(document.getString("artistID").equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+                        albumList.add(document.getString("albumName"));
+                        albumListWithIDs.put(document.getString("albumName"), document.getId().toString());
+
+                    }
+
+                    //Log.d(TAG, document.getId() + " => " + document.getData());
+                }
+                Log.d("album", albumList.toString());
+                // Create an ArrayAdapter using the string array and a default spinner layout
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, albumList);
+                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                // Apply the adapter to the spinner
+                album.setAdapter(arrayAdapter);
+            } else {
+                //Log.d(TAG, "Error getting documents: ", task.getException());
+            }
+            Log.d("albums", albumListWithIDs.toString());
+        });
     }
 }
