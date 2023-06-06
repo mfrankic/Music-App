@@ -112,6 +112,8 @@ public class SettingsFragment extends Fragment {
                         .addOnSuccessListener(aVoid -> {
                             editor.putBoolean("isArtist", true);
                             editor.apply();
+                            activity.isArtistChange();
+                            Log.d("art", Boolean.toString(isChecked));
                         })
                         .addOnFailureListener(e -> {
                         });
@@ -120,10 +122,13 @@ public class SettingsFragment extends Fragment {
                         .addOnSuccessListener(aVoid -> {
                             editor.putBoolean("isArtist", false);
                             editor.apply();
+                            activity.isArtistChange();
+                            Log.d("art", Boolean.toString(isChecked));
                         })
                         .addOnFailureListener(e -> {
                         });
             }
+
 
         });
 

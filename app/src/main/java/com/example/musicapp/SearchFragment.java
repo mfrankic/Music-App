@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -97,9 +99,18 @@ public class SearchFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        AppCompatImageButton settingsButton = view.findViewById(R.id.settings_button);
+        settingsButton.setOnClickListener(v -> activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment_container, activity.settingsFragment)
+                .commit());
+
+        TextView greeting = view.findViewById(R.id.greeting_message);
+        greeting.setText("Hello " + DataSingleton.getDataSingleton().getCurrentUserName());
+
         activity = (MainActivity) getActivity();
         assert activity != null;
-
+        activity.isArtistChange();
         db = FirebaseFirestore.getInstance();
 
         /*

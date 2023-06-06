@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     protected final SearchFragment searchFragment = new SearchFragment();
     protected final SettingsFragment settingsFragment = new SettingsFragment();
     public final LibraryFragment libraryFragment = new LibraryFragment();
+    protected  ArtistViewFragment artistViewFragment;
 
     private View uploadButtonItem;
 
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     public ArrayList<String> allArtists;
     ArrayList<String> allReleaseYears;
     private Map<String, String> usersSongCollRef;
+    private Map<String, String> usersIDAndBio;
     boolean userIDsFetchfinished, songsFetchFinished, albumsFetchFinished;
     private int numOfSongsFetched, numOfURLsFetched;
 
@@ -160,11 +162,35 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         storageRef = storage.getReference();
 
         getAllBackendData();
+        getCurrentUserData();
+        isArtistChange();
     }
 
 
+    private void getCurrentUserData(){
+
+        FirebaseUser currentUser = auth.getCurrentUser();
+        DataSingleton.getDataSingleton().setCurrentUserID(currentUser.getUid());
+        Log.d("currentUser", DataSingleton.getDataSingleton().getCurrentUserID());
+        DocumentReference docRef = db.collection("users").document(currentUser.getUid());
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    Log.d("SETTINGS", "DocumentSnapshot data: " + document.get("name"));
+                    DataSingleton.getDataSingleton().setCurrentUserName(String.valueOf(document.get("name")));
+
+                } else {
+                    Log.d("SETTINGS", "No such document");
+                }
+            } else {
+                Log.d("SETTINGS", "get failed with ", task.getException());
+            }
+        });
+    }
     private void  getUsersIDs(){
         usersSongCollRef = new HashMap<String, String>();
+        usersIDAndBio = new HashMap<String, String>();
 
         // Users collection reference
         CollectionReference usersCollRef = db.collection("users");
@@ -176,6 +202,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Log.d("allSongs", document.getId() + " => " + document.getData());
                         usersSongCollRef.put(document.getId().toString(), document.getString("name"));
+                        usersIDAndBio.put(document.getId().toString(), document.getString("bio"));
                     }
                     userIDsFetchfinished = true;
                     getSongsDocuments();
@@ -204,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                             Log.d("allSongs", document.getId() + " => " + document.getData());
 
                             Song song = new Song();
+                            song.setArtistBio(usersIDAndBio.get(entry.getKey()));
                             song.setAlbumUUDI(document.getString("album"));
                             song.setGenre(document.getString("genre"));
                             song.setSongName(document.getString("songName"));
@@ -363,26 +391,11 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         getUsersIDs();
 
-        Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_LONG).show();
+        Toast.makeText(MainActivity.this, "Backend data refresh started", Toast.LENGTH_LONG).show();
 
     }
 
-    public void refreshBackendData(){
-        allSongs = new ArrayList<>();
-        allAlbums = new ArrayList<>();
-        allArtists = new ArrayList<>();
 
-        userIDsFetchfinished = false;
-        songsFetchFinished = false;
-        albumsFetchFinished = false;
-
-        numOfSongsFetched = 0;
-        numOfURLsFetched = 0;
-
-        getUsersIDs();
-
-        Toast.makeText(MainActivity.this, "Data load started", Toast.LENGTH_LONG).show();
-    }
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -411,6 +424,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                     .beginTransaction()
                     .replace(R.id.main_fragment_container, homeFragment)
                     .commit();
+            //isArtistChange();
             return true;
         } else if (itemId == R.id.search_button) {
             Log.d("MainActivity", "Search button clicked");
@@ -418,14 +432,17 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                     .beginTransaction()
                     .replace(R.id.main_fragment_container, searchFragment)
                     .commit();
+            //isArtistChange();
             return true;
         } else if (itemId == R.id.library_button) {
             getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, libraryFragment).commit();
             Log.d("MainActivity", "Library button clicked");
+            //isArtistChange();
             return true;
         } else if (itemId == R.id.upload_song_button) {
             getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, uploadSongFragment).commit();
             Log.d("MainActivity", "Upload song clicked");
+            //isArtistChange();
             return true;
         }
         return false;
@@ -435,9 +452,11 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         isArtist = sharedPreferences.getBoolean("isArtist", false);
 
         if (isArtist) {
+            Log.d("isArtist", "true");
             uploadButtonItem.setVisibility(View.VISIBLE);
         } else {
             uploadButtonItem.setVisibility(View.GONE);
+            Log.d("isArtist", "false");
         }
 
     }

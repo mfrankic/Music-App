@@ -22,7 +22,7 @@ public class DataSingleton {
     private static ArrayList<Album> allAlbums;
 
     private static int numOfFetchedURLs;
-
+    private static String currentUserName, currentUserID, currentUserBio;
 
     private DataSingleton(){
 
@@ -82,7 +82,28 @@ public class DataSingleton {
     public int getSongsCount(){return allSongs.size();}
 
 
+    public  String getCurrentUserName() {
+        return currentUserName;
+    }
 
+    public  void setCurrentUserName(String currentUserName) {
+        DataSingleton.currentUserName = currentUserName;
+    }
 
+    public  String getCurrentUserID() {
+        return currentUserID;
+    }
+
+    public void setCurrentUserID(String currentUserID) {
+        DataSingleton.currentUserID = currentUserID;
+    }
+
+    public  String getCurrentUserBio() {
+        return currentUserBio;
+    }
+
+    public  void setCurrentUserBio(String currentUserBio) {
+        DataSingleton.currentUserBio = currentUserBio;
+    }
 }
 

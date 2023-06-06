@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -66,6 +67,7 @@ public class LibraryFragment extends Fragment {
     int numOfFetchedURLs;
     private  FirebaseStorage storage;
     private  StorageReference storageRef;
+    MainActivity activity;
 
 
     public LibraryFragment() {
@@ -315,7 +317,7 @@ public class LibraryFragment extends Fragment {
 
 
     private void setAllSongsAdapter(ArrayList<Song> songs){
-        songsViewAdapter = new SongsViewAdapter(getContext(), songs);
+        songsViewAdapter = new SongsViewAdapter(getContext(), songs, activity );
         allSongsView.setAdapter(songsViewAdapter);
     }
 
@@ -362,10 +364,21 @@ public class LibraryFragment extends Fragment {
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        activity = (MainActivity) getActivity();
+        assert activity != null;
+
+        activity.isArtistChange();
         super.onViewCreated(view, savedInstanceState);
 
-        MainActivity activity = (MainActivity) getActivity();
-        assert activity != null;
+
+        AppCompatImageButton settingsButton = view.findViewById(R.id.settings_button);
+        settingsButton.setOnClickListener(v -> activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment_container, activity.settingsFragment)
+                .commit());
+
+        TextView greeting = view.findViewById(R.id.greeting_message);
+        greeting.setText("Hello " + DataSingleton.getDataSingleton().getCurrentUserName());
 
         counter = 0;
 
@@ -436,6 +449,7 @@ public class LibraryFragment extends Fragment {
         filterBySpinner.setOnItemSelectedListener(filterBySpinnerListener);
 
         numOfFetchedURLs = 0;
+
 
 
 

@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 public class Song {
 
-    private String songName, artistName, songFileUUID, genre, artistID, albumUUDI, albumName, songPath;
+    private String songName, artistName, songFileUUID, genre, artistID, albumUUDI, albumName, songPath, artistBio;
     private Timestamp releaseDate;
 
     public Song() {
@@ -84,6 +84,14 @@ public class Song {
         this.songPath = songPath;
     }
 
+    public String getArtistBio() {
+        return artistBio;
+    }
+
+    public void setArtistBio(String artistBio) {
+        this.artistBio = artistBio;
+    }
+
     @Override
     public String toString() {
         return "Song{" +
@@ -95,6 +103,7 @@ public class Song {
                 ", albumUUDI='" + albumUUDI + '\'' +
                 ", albumName='" + albumName + '\'' +
                 ", songPath='" + songPath + '\'' +
+                ", artistBio='" + artistBio + '\'' +
                 ", releaseDate=" + releaseDate +
                 '}';
     }

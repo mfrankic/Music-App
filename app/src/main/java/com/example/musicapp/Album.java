@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 
 public class Album {
 
-    private String albumName, albumID;
+    private String albumName, albumID, artistID;
     private Timestamp releaseDate;
 
     public Album() {
@@ -33,6 +33,14 @@ public class Album {
 
     public void setReleaseDate(Timestamp releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public String getArtistID() {
+        return artistID;
+    }
+
+    public void setArtistID(String artistID) {
+        this.artistID = artistID;
     }
 
     @Override
