@@ -316,6 +316,8 @@ public class UploadSongFragment extends Fragment {
             data.put("songName", songName.getText().toString());
             data.put("genre", genre.getSelectedItem().toString());
             data.put("album", uuidAlbumString);
+            data.put("numberOfLikes", "0");
+            data.put("numberOfListens","0");
 
             subCollectionRef.add(data)
                     .addOnSuccessListener(documentReference ->

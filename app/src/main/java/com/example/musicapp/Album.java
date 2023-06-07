@@ -47,8 +47,9 @@ public class Album {
     public String toString() {
         return "Album{" +
                 "albumName='" + albumName + '\'' +
-                ", releaseDate='" + releaseDate + '\'' +
                 ", albumID='" + albumID + '\'' +
+                ", artistID='" + artistID + '\'' +
+                ", releaseDate=" + releaseDate +
                 '}';
     }
 

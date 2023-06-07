@@ -6,6 +6,7 @@ public class Song {
 
     private String songName, artistName, songFileUUID, genre, artistID, albumUUDI, albumName, songPath, artistBio;
     private Timestamp releaseDate;
+    private int numberOfLikes, numberOfListens;
 
     public Song() {
 
@@ -90,6 +91,26 @@ public class Song {
 
     public void setArtistBio(String artistBio) {
         this.artistBio = artistBio;
+    }
+
+    public int getNumberOfLikes() {
+        return numberOfLikes;
+    }
+
+    public void setNumberOfLikes(String numberOfLikes) {
+        this.numberOfLikes = Integer.valueOf(numberOfLikes);
+    }
+
+    public void setNumberOfLikes(int numberOfLikes) {
+        this.numberOfLikes = numberOfLikes;
+    }
+
+    public int getNumberOfListens() {
+        return numberOfListens;
+    }
+
+    public void setNumberOfListens(int numberOfListens) {
+        this.numberOfListens = numberOfListens;
     }
 
     @Override
