@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     public ArrayList<Album> allAlbums;
     public ArrayList<String> allArtists;
     ArrayList<String> allReleaseYears;
+    ArrayList<User> allUsers;
     private Map<String, String> usersSongCollRef;
     private Map<String, String> usersIDAndBio;
     boolean userIDsFetchfinished, songsFetchFinished, albumsFetchFinished;
@@ -203,6 +204,21 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         Log.d("allSongs", document.getId() + " => " + document.getData());
                         usersSongCollRef.put(document.getId().toString(), document.getString("name"));
                         usersIDAndBio.put(document.getId().toString(), document.getString("bio"));
+
+                        User user = new User();
+                        user.setUserID(document.getId());
+                        user.setUserBio(document.getString("bio"));
+                        user.setUserName(document.getString("name"));
+
+
+                        String isArtistString = String.valueOf(document.get("isArtist"));
+                        isArtist = Boolean.valueOf(isArtistString);
+                        if (isArtist){
+                            user.setArtist(true);
+                        }else {
+                            user.setArtist(false);
+                        }
+
                     }
                     userIDsFetchfinished = true;
                     getSongsDocuments();
@@ -385,6 +401,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         allSongs = new ArrayList<>();
         allAlbums = new ArrayList<>();
         allArtists = new ArrayList<>();
+        allUsers = new ArrayList<>();
 
         userIDsFetchfinished = false;
         songsFetchFinished = false;
