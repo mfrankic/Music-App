@@ -36,11 +36,11 @@ public class ArtistViewFragment extends Fragment {
     private ArrayList<Album> albums;
     private String artistName, artistBio, artistID;
     RecyclerView songsView, albumsView;
-    LinearLayoutManager songsViewManager;
+    LinearLayoutManager songsViewManager, albumViewManager;
     ArtistViewSongsAdapter songsViewAdapter;
+    ArtistViewAlbumsAdapter albumViewAdapter;
 
-    public ArtistViewFragment(String artistID) {
-        this.artistID = artistID;
+    public ArtistViewFragment() {
     }
 
     @Override
@@ -74,39 +74,25 @@ public class ArtistViewFragment extends Fragment {
         name.setText(artistName);
         bio.setText(artistBio);
 
+
         getSongsAndAlbums();
+
 
         songsView = view.findViewById(R.id.artist_songs_recycler_view);
         songsViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         songsView.setLayoutManager(songsViewManager);
         songsViewAdapter = new ArtistViewSongsAdapter(getContext(), songs);
+        songsView.setAdapter(songsViewAdapter);
+
+        albumsView = view.findViewById(R.id.artist_albums_recycler_view);
+        albumViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        albumsView.setLayoutManager(albumViewManager);
+        albumViewAdapter = new ArtistViewAlbumsAdapter(getContext(), albums);
+        albumsView.setAdapter(albumViewAdapter);
+
+
     }
 
-    /*
-    private void getSongsAndAlbums(){
-        songs = new ArrayList<>();
-        albums = new ArrayList<>();
-        for (Song song: DataSingleton.getDataSingleton().getAllSongs()){
-            Log.d("artistView", song.toString());
-            if(song.getArtistID().equals(this.artistID)){
-                this.songs.add(song);
-            }
-        }
-
-        Log.d("artistViewSongs", this.songs.toString());
-        ArrayList<Album> allAlbums = DataSingleton.getDataSingleton().getAllAlbums();
-        for(Album album: allAlbums){
-            Log.d("artistViewcheck", album.toString());
-            Log.d("artistViewcheck", this.artistID);
-            String albumArtistID = album.getArtistID();
-            if(albumArtistID.equals(artistID)){
-                albums.add(album);
-                Log.d("artistView", "album added");
-            }
-        }
-    }
-
-     */
 
     private void getSongsAndAlbums() {
         songs = new ArrayList<>();
@@ -124,6 +110,7 @@ public class ArtistViewFragment extends Fragment {
             }
         }
     }
+
     private void getNameAndBio(){
         for(Song song: DataSingleton.getDataSingleton().getAllSongs()){
             if(song.getArtistID().equals(this.artistID)){
@@ -131,5 +118,10 @@ public class ArtistViewFragment extends Fragment {
                 artistBio = song.getArtistBio();
             }
         }
+    }
+
+    public void setArtistID(String artistID){
+        this.artistID = artistID;
+
     }
 }

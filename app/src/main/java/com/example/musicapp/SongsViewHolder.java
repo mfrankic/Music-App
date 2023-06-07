@@ -74,7 +74,7 @@ public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.On
                 addSongToQueue();
                 return true;
             case R.id.artist_profile:
-                activity.artistViewFragment = new ArtistViewFragment(artistID);
+                activity.artistViewFragment.setArtistID(artistID);
                 activity.getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.main_fragment_container, activity.artistViewFragment)

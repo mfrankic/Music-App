@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     protected final SearchFragment searchFragment = new SearchFragment();
     protected final SettingsFragment settingsFragment = new SettingsFragment();
     public final LibraryFragment libraryFragment = new LibraryFragment();
-    protected  ArtistViewFragment artistViewFragment;
+    protected  ArtistViewFragment artistViewFragment = new ArtistViewFragment();
 
     private View uploadButtonItem;
 
@@ -290,6 +290,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         album.setAlbumName(document.get("albumName").toString());
                         album.setReleaseDate(releaseDate);
                         album.setAlbumID(document.getId().toString());
+                        album.setArtistID(document.getString("artistID"));
                         allAlbums.add(album);
 
                     }
@@ -329,6 +330,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             }
 
         }
+
 
     }
 
