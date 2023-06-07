@@ -1,6 +1,7 @@
 package com.example.musicapp;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -33,6 +34,8 @@ public class SongsViewAdapter extends RecyclerView.Adapter<SongsViewHolder>{
     public void onBindViewHolder(@NonNull SongsViewHolder holder, int position) {
         holder.songName.setText(items.get(position).getSongName());
         holder.artistName.setText(items.get(position).getArtistName());
+        Log.d("adapter", String.valueOf(items.get(position).getNumberOfLikes()));
+        holder.numberOfLikes.setText("Number of likes: " + String.valueOf(items.get(position).getNumberOfLikes()));
         holder.setSongFileUUID(items.get(position).getSongFileUUID());
         holder.setArtistID(items.get(position).getArtistID());
     }

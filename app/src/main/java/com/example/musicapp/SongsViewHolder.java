@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener{
     TextView songName;
-    TextView artistName;
+    TextView artistName, numberOfLikes;
     String songFileUUID;
     private Context context;
     View view;
@@ -30,6 +30,8 @@ public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.On
         super(itemView);
         songName = (TextView)itemView.findViewById(R.id.library_song_name);
         artistName = (TextView)itemView.findViewById(R.id.library_artist_name);
+        numberOfLikes = (TextView)itemView.findViewById(R.id.library_song_view_num_of_likes);
+        //Log.d("holder", numberOfLikes.getText().toString());
         view  = itemView;
         this.context = context;
         itemView.setOnClickListener(this);

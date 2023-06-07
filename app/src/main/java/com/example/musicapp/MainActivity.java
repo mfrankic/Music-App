@@ -238,6 +238,8 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                             song.setSongFileUUID(document.getString("songUUID"));
                             song.setArtistName(entry.getValue());
                             song.setArtistID(entry.getKey());
+                            song.setNumberOfLikes(document.getString("numberOfLikes"));
+                            song.setNumberOfListens(Integer.valueOf(document.getString("numberOfListens")));
                             //song.setSongPath(document.get);
                             Log.d("pesma", song.toString());
 
