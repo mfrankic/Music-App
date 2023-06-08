@@ -16,9 +16,9 @@ import android.widget.SeekBar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.musicapp.services.MusicPlayerService;
 import com.example.musicapp.R;
 import com.example.musicapp.entities.TempSong;
+import com.example.musicapp.services.MusicPlayerService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textview.MaterialTextView;
 
@@ -27,6 +27,7 @@ import java.util.List;
 
 public class MusicPlayerActivity extends AppCompatActivity {
 
+    private static final String NOTIFICATION_CHANNEL_ID = "music_player_channel";
     private MediaBrowserCompat mediaBrowser;
     private MediaControllerCompat mediaController;
     private String songTitle = "";
@@ -56,7 +57,6 @@ public class MusicPlayerActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
-        // if service is not running then start it
         if (!MusicPlayerService.isRunning()) {
             initializeData();
         }
@@ -102,9 +102,8 @@ public class MusicPlayerActivity extends AppCompatActivity {
 
     private void initializeData() {
         ArrayList<Integer> songList = new ArrayList<>();
-        TempSong firstSong = new TempSong(1, "Don Omar", "Danza Kuduro", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
-        TempSong secondSong = new TempSong(2, "Akon", "Smack That", "Konvicted", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2FAkon%20-%20Smack%20That%20(Official%20Music%20Video)%20ft.%20Eminem.mp3?alt=media&token=f728aafc-0cb6-4270-b07b-f3ec40abd347");
-
+        TempSong firstSong = new TempSong(1, "Danza Kuduro", "Don Omar", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
+        TempSong secondSong = new TempSong(2, "In Da Club", "50 Cent", "Get Rich Or Die Tryin'", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2Fde4d5dcf-6d7c-4b60-87bb-6a0f044d1923.mp3?alt=media&token=0e420a8f-92c2-4f1a-8aba-0ae79de098d5");
         songList.add(firstSong.getSongId());
         songList.add(secondSong.getSongId());
 
@@ -123,6 +122,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
                 super.onChildrenLoaded(parentId, children);
             }
         });
+
         this.startService(startServiceIntent);
     }
 
@@ -208,6 +208,17 @@ public class MusicPlayerActivity extends AppCompatActivity {
                 mHandler.post(mUpdateElapsedTimeRunnable);
             }
         });
+
+        // update song title and artist
+        MediaMetadataCompat metadata = mediaController.getMetadata();
+        String songTitle = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
+        String songArtist = metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST);
+
+        MaterialTextView songTitleView = findViewById(R.id.title);
+        MaterialTextView songArtistView = findViewById(R.id.artist);
+
+        songTitleView.setText(songTitle);
+        songArtistView.setText(songArtist);
 
         // Register a Callback to stay in sync
         mediaController.registerCallback(controllerCallback);
