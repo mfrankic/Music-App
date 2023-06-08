@@ -1,4 +1,4 @@
-package com.example.musicapp;
+package com.example.musicapp.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +8,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.musicapp.entities.CarouselItem;
+import com.example.musicapp.R;
 
 import java.util.List;
 

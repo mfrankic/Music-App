@@ -133,7 +133,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/fragment_upload_song_name"
-                    android:text="my song"></EditText>
+                    android:hint="My Song"></EditText>
             </LinearLayout>
 
             <LinearLayout
@@ -229,7 +229,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/fragment_upload_album_name"
-                    android:text="My album"></EditText>
+                    android:hint="My Album"></EditText>
 
 
             </LinearLayout>

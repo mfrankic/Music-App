@@ -1,6 +1,4 @@
-package com.example.musicapp;
-
-import static android.app.PendingIntent.getActivity;
+package com.example.musicapp.views;
 
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -15,24 +13,31 @@ import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicapp.entities.DataSingleton;
+import com.example.musicapp.R;
+import com.example.musicapp.entities.Song;
+import com.example.musicapp.activities.MainActivity;
+import com.example.musicapp.activities.MusicPlayerActivity;
+
 import java.util.ArrayList;
 
-public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener{
-    TextView songName;
-    TextView artistName, numberOfLikes;
+public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener {
+    public TextView songName;
+    public TextView artistName;
+    public TextView numberOfLikes;
     String songFileUUID;
     private Context context;
     View view;
     MainActivity activity;
     String artistID;
 
-    public SongsViewHolder(View itemView, Context context, MainActivity activity){
+    public SongsViewHolder(View itemView, Context context, MainActivity activity) {
         super(itemView);
-        songName = (TextView)itemView.findViewById(R.id.library_song_name);
-        artistName = (TextView)itemView.findViewById(R.id.library_artist_name);
-        numberOfLikes = (TextView)itemView.findViewById(R.id.library_song_view_num_of_likes);
+        songName = (TextView) itemView.findViewById(R.id.library_song_name);
+        artistName = (TextView) itemView.findViewById(R.id.library_artist_name);
+        numberOfLikes = (TextView) itemView.findViewById(R.id.library_song_view_num_of_likes);
         //Log.d("holder", numberOfLikes.getText().toString());
-        view  = itemView;
+        view = itemView;
         this.context = context;
         itemView.setOnClickListener(this);
         itemView.setOnLongClickListener(this);
@@ -40,12 +45,12 @@ public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.On
     }
 
     @Override
-    public void onClick(View v){
+    public void onClick(View v) {
         Log.d("onesong", "Stisnuto");
         ArrayList<Song> songQueue = new ArrayList<>();
 
-        for(Song song: DataSingleton.getDataSingleton().getAllSongs()){
-            if(song.getSongFileUUID().equals(this.songFileUUID)){
+        for (Song song : DataSingleton.getDataSingleton().getAllSongs()) {
+            if (song.getSongFileUUID().equals(this.songFileUUID)) {
                 songQueue.add(song);
             }
         }
@@ -57,13 +62,12 @@ public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.On
     }
 
     @Override
-    public boolean onLongClick(View v){
+    public boolean onLongClick(View v) {
         PopupMenu popup = new PopupMenu(context, v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.song_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(this);
         popup.show();
-
 
 
         return true;
@@ -99,9 +103,9 @@ public  class SongsViewHolder extends RecyclerView.ViewHolder implements View.On
         this.artistID = artistID;
     }
 
-    private void addSongToQueue(){
-        for(Song song: DataSingleton.getDataSingleton().getAllSongs()){
-            if(song.getSongFileUUID().equals(this.songFileUUID)){
+    private void addSongToQueue() {
+        for (Song song : DataSingleton.getDataSingleton().getAllSongs()) {
+            if (song.getSongFileUUID().equals(this.songFileUUID)) {
                 DataSingleton.getDataSingleton().getSongsQueue().add(song);
             }
         }

@@ -1,4 +1,4 @@
-package com.example.musicapp;
+package com.example.musicapp.fragments;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -23,9 +23,11 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
+import com.example.musicapp.entities.DataSingleton;
+import com.example.musicapp.R;
+import com.example.musicapp.activities.MainActivity;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -148,7 +150,7 @@ public class UploadSongFragment extends Fragment {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     Log.d("currentUserUp", DataSingleton.getDataSingleton().getCurrentUserID());
-                    if(document.getString("artistID").equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+                    if (document.getString("artistID").equals(DataSingleton.getDataSingleton().getCurrentUserID())) {
                         albumList.add(document.getString("albumName"));
                         albumListWithIDs.put(document.getString("albumName"), document.getId().toString());
 
@@ -259,7 +261,7 @@ public class UploadSongFragment extends Fragment {
                         albumList.clear();
                         albumListWithIDs.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            if(document.getString("artistID").equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+                            if (document.getString("artistID").equals(DataSingleton.getDataSingleton().getCurrentUserID())) {
                                 albumList.add(document.getString("albumName"));
                                 albumListWithIDs.put(document.getString("albumName"), document.getId().toString());
 
@@ -307,6 +309,7 @@ public class UploadSongFragment extends Fragment {
                 Toast.makeText(getContext(), "Song uploaded successfully", Toast.LENGTH_SHORT).show();
                 activity.getAllBackendData();
                 updateAlbumSpinner();
+                resetFields();
             });
 
             // Update user document to reference the uploaded song
@@ -317,27 +320,25 @@ public class UploadSongFragment extends Fragment {
             data.put("genre", genre.getSelectedItem().toString());
             data.put("album", uuidAlbumString);
             data.put("numberOfLikes", "0");
-            data.put("numberOfListens","0");
+            data.put("numberOfListens", "0");
 
             subCollectionRef.add(data)
-                    .addOnSuccessListener(documentReference ->
-                            Log.d("TAG", "Document added with ID: " + documentReference.getId()))
+                    .addOnSuccessListener(documentReference -> Log.d("TAG", "Document added with ID: " + documentReference.getId()))
                     .addOnFailureListener(e -> Log.w("TAG", "Error adding document", e));
 
 
         });
 
-
     }
 
-    private void updateAlbumSpinner(){
+    private void updateAlbumSpinner() {
         CollectionReference albumsColl = db.collection("albums");
         ArrayList<String> albumList = new ArrayList<>();
         Map<String, String> albumListWithIDs = new HashMap<>();
         albumsColl.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    if(document.getString("artistID").equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+                    if (document.getString("artistID").equals(DataSingleton.getDataSingleton().getCurrentUserID())) {
                         albumList.add(document.getString("albumName"));
                         albumListWithIDs.put(document.getString("albumName"), document.getId().toString());
 
@@ -357,5 +358,18 @@ public class UploadSongFragment extends Fragment {
             }
             Log.d("albums", albumListWithIDs.toString());
         });
+    }
+
+    private void resetFields() {
+        uri = null;
+        fileToUpload.setText("");
+        songName.setText("");
+        genre.setSelection(0);
+        albumName.setText("");
+        albumDatePicker.setText("");
+        album.setVisibility(View.GONE);
+        albumSelectLabel.setVisibility(View.GONE);
+        albumDateLay.setVisibility(View.GONE);
+        newAlbumCheck.setChecked(false);
     }
 }

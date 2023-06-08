@@ -1,4 +1,4 @@
-package com.example.musicapp;
+package com.example.musicapp.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,9 +7,13 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicapp.entities.Album;
+import com.example.musicapp.views.ArtistViewAlbumViewHolder;
+import com.example.musicapp.R;
+
 import java.util.List;
 
-public class ArtistViewAlbumsAdapter extends RecyclerView.Adapter<ArtistViewAlbumViewHolder>{
+public class ArtistViewAlbumsAdapter extends RecyclerView.Adapter<ArtistViewAlbumViewHolder> {
 
     Context context;
 

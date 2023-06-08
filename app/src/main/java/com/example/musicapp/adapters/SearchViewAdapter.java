@@ -1,4 +1,4 @@
-package com.example.musicapp;
+package com.example.musicapp.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,9 +7,13 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicapp.R;
+import com.example.musicapp.entities.SearchElement;
+import com.example.musicapp.views.SearchViewHolder;
+
 import java.util.List;
 
-public class SearchViewAdapter extends RecyclerView.Adapter<SearchViewHolder>{
+public class SearchViewAdapter extends RecyclerView.Adapter<SearchViewHolder> {
 
 
     Context context;

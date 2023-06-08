@@ -1,11 +1,6 @@
-package com.example.musicapp;
+package com.example.musicapp.fragments;
 
-import static java.sql.Types.TIMESTAMP;
-
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,34 +18,27 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.example.musicapp.entities.Album;
+import com.example.musicapp.entities.DataSingleton;
+import com.example.musicapp.R;
+import com.example.musicapp.entities.Song;
+import com.example.musicapp.activities.MainActivity;
+import com.example.musicapp.adapters.SongsViewAdapter;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.type.DateTime;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
 public class LibraryFragment extends Fragment {
 
-    private  FirebaseFirestore db;
+    private FirebaseFirestore db;
     private Map<String, String> usersSongCollRef;
     public ArrayList<Song> allSongs, artistSongs, genreSongs, releaseYearSongs;
     public ArrayList<Album> allAlbums;
@@ -65,8 +53,8 @@ public class LibraryFragment extends Fragment {
     String selectedItem;
     Integer counter;
     int numOfFetchedURLs;
-    private  FirebaseStorage storage;
-    private  StorageReference storageRef;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
     MainActivity activity;
 
 
@@ -86,7 +74,7 @@ public class LibraryFragment extends Fragment {
     }
 
 
-   AdapterView.OnItemSelectedListener filterBySpinnerListener =  new AdapterView.OnItemSelectedListener() {
+    AdapterView.OnItemSelectedListener filterBySpinnerListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             selectedItem = (String) parent.getItemAtPosition(position);
@@ -96,7 +84,7 @@ public class LibraryFragment extends Fragment {
                 filterAdapter.clear();
                 filterAdapter.addAll(entries);
                 filterAdapter.notifyDataSetChanged();
-            } else if (selectedItem.equals("Artist")){
+            } else if (selectedItem.equals("Artist")) {
                 Log.d("promjena", allArtists.toString());
                 filterAdapter.clear();
                 filterAdapter.addAll(allArtists);
@@ -108,15 +96,16 @@ public class LibraryFragment extends Fragment {
                 filterAdapter.notifyDataSetChanged();
             }
         }
+
         @Override
         public void onNothingSelected(AdapterView<?> parent) {
             // Handle case when no item is selected
         }
     };
 
-    private void getAllReleaseYears(){
+    private void getAllReleaseYears() {
         allReleaseYears = new ArrayList<>();
-        for(Album album: allAlbums){
+        for (Album album : allAlbums) {
             Timestamp timestamp = album.getReleaseDate();
             Date date = new Date();
             date.setTime(timestamp.getTime());
@@ -127,7 +116,7 @@ public class LibraryFragment extends Fragment {
             String releaseYear = simpleDateFormat.format(calendar.getTime()).toString();
 
 
-            if(!allReleaseYears.contains(releaseYear)){
+            if (!allReleaseYears.contains(releaseYear)) {
                 allReleaseYears.add(releaseYear);
             }
         }
@@ -316,34 +305,34 @@ public class LibraryFragment extends Fragment {
     */
 
 
-    private void setAllSongsAdapter(ArrayList<Song> songs){
-        songsViewAdapter = new SongsViewAdapter(getContext(), songs, activity );
+    private void setAllSongsAdapter(ArrayList<Song> songs) {
+        songsViewAdapter = new SongsViewAdapter(getContext(), songs, activity);
         allSongsView.setAdapter(songsViewAdapter);
     }
 
-    private void getSongsByArtist(String artistName){
+    private void getSongsByArtist(String artistName) {
         artistSongs = new ArrayList<>();
-        for(Song song: allSongs){
-            if(song.getArtistName().equals(artistName)){
+        for (Song song : allSongs) {
+            if (song.getArtistName().equals(artistName)) {
                 artistSongs.add(song);
             }
         }
     }
 
-    private void getSongsByGenre(String genre){
+    private void getSongsByGenre(String genre) {
         genreSongs = new ArrayList<>();
-        for(Song song: allSongs){
-            if(song.getGenre().equals(genre)){
+        for (Song song : allSongs) {
+            if (song.getGenre().equals(genre)) {
                 genreSongs.add(song);
             }
         }
     }
 
-    private void getSongsByYear(String year){
+    private void getSongsByYear(String year) {
         releaseYearSongs = new ArrayList<>();
-        for(Song song: allSongs){
+        for (Song song : allSongs) {
 
-            if(song.getReleaseDate() != null){
+            if (song.getReleaseDate() != null) {
                 Timestamp timestamp = song.getReleaseDate();
                 Date date = new Date();
                 date.setTime(timestamp.getTime());
@@ -354,7 +343,7 @@ public class LibraryFragment extends Fragment {
                 String releaseYear = simpleDateFormat.format(calendar.getTime()).toString();
                 Log.d("byyear", song.getReleaseDate().toString());
 
-                if(releaseYear.equals(year)) {
+                if (releaseYear.equals(year)) {
                     releaseYearSongs.add(song);
                 }
             }
@@ -396,7 +385,7 @@ public class LibraryFragment extends Fragment {
             Log.d("libsig", allSongs.toString());
             Log.d("libsig", allAlbums.toString());
             Log.d("libsig", allArtists.toString());
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -407,17 +396,17 @@ public class LibraryFragment extends Fragment {
         filterSpinner = view.findViewById(R.id.filterSpinner);
         filterBtn = view.findViewById(R.id.filter_button);
 
-        filterBtn.setOnClickListener(v ->{
-            if(filterBySpinner.getSelectedItem().toString().equals("Artist")){
+        filterBtn.setOnClickListener(v -> {
+            if (filterBySpinner.getSelectedItem().toString().equals("Artist")) {
                 String selectedArtist = filterSpinner.getSelectedItem().toString();
                 getSongsByArtist(selectedArtist);
                 Log.d("byartist", artistSongs.toString());
                 setAllSongsAdapter(artistSongs);
-            }else if (filterBySpinner.getSelectedItem().toString().equals("Genre")){
+            } else if (filterBySpinner.getSelectedItem().toString().equals("Genre")) {
                 String selectedGenre = filterSpinner.getSelectedItem().toString();
                 getSongsByGenre(selectedGenre);
                 setAllSongsAdapter(genreSongs);
-            }else if (filterBySpinner.getSelectedItem().toString().equals("Release year")){
+            } else if (filterBySpinner.getSelectedItem().toString().equals("Release year")) {
                 String selectedYear = filterSpinner.getSelectedItem().toString();
                 //updateSongsWithAlbumData();
                 getSongsByYear(selectedYear);
@@ -441,18 +430,13 @@ public class LibraryFragment extends Fragment {
         setAllSongsAdapter(allSongs);
 
 
-
-        filterAdapter  = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, allArtistsCopy);
+        filterAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, allArtistsCopy);
         filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         filterSpinner.setAdapter(filterAdapter);
 
         filterBySpinner.setOnItemSelectedListener(filterBySpinnerListener);
 
         numOfFetchedURLs = 0;
-
-
-
-
 
 
     }
@@ -469,7 +453,7 @@ public class LibraryFragment extends Fragment {
         return numOfFetchedURLs;
     }
 
-    public void dataUpdate(){
+    public void dataUpdate() {
         allSongs = DataSingleton.getDataSingleton().getAllSongs();
         allAlbums = DataSingleton.getDataSingleton().getAllAlbums();
         allArtists = DataSingleton.getDataSingleton().getAllArtists();

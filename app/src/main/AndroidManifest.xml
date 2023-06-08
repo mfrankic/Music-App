@@ -15,7 +15,7 @@
         android:theme="@style/Theme.MusicApp"
         tools:targetApi="33">
         <service
-            android:name=".MusicPlayerService"
+            android:name=".services.MusicPlayerService"
             android:enabled="true"
             android:exported="false">
 
@@ -46,16 +46,16 @@
         </receiver>
 
         <activity
-            android:name=".MusicPlayerActivity"
+            android:name=".activities.MusicPlayerActivity"
             android:exported="false" />
         <activity
-            android:name=".RegisterActivity"
+            android:name=".activities.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".activities.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

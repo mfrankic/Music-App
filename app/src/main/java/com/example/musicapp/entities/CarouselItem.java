@@ -1,4 +1,4 @@
-package com.example.musicapp;
+package com.example.musicapp.entities;
 
 public class CarouselItem {
     private final int imageResId;

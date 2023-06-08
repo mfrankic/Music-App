@@ -1,4 +1,4 @@
-package com.example.musicapp;
+package com.example.musicapp.activities;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,6 +16,17 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
+import com.example.musicapp.entities.Album;
+import com.example.musicapp.entities.DataSingleton;
+import com.example.musicapp.R;
+import com.example.musicapp.entities.Song;
+import com.example.musicapp.entities.User;
+import com.example.musicapp.fragments.ArtistViewFragment;
+import com.example.musicapp.fragments.HomeFragment;
+import com.example.musicapp.fragments.LibraryFragment;
+import com.example.musicapp.fragments.SearchFragment;
+import com.example.musicapp.fragments.SettingsFragment;
+import com.example.musicapp.fragments.UploadSongFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -41,16 +51,16 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
 
-    protected final HomeFragment homeFragment = new HomeFragment();
+    public final HomeFragment homeFragment = new HomeFragment();
     protected final UploadSongFragment uploadSongFragment = new UploadSongFragment();
     protected final SearchFragment searchFragment = new SearchFragment();
-    protected final SettingsFragment settingsFragment = new SettingsFragment();
+    public final SettingsFragment settingsFragment = new SettingsFragment();
     public final LibraryFragment libraryFragment = new LibraryFragment();
-    protected  ArtistViewFragment artistViewFragment = new ArtistViewFragment();
+    public ArtistViewFragment artistViewFragment = new ArtistViewFragment();
 
     private View uploadButtonItem;
 
-    protected final FirebaseAuth auth = FirebaseAuth.getInstance();
+    public final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseStorage storage;
     private StorageReference storageRef;
@@ -168,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     }
 
 
-    private void getCurrentUserData(){
+    private void getCurrentUserData() {
 
         FirebaseUser currentUser = auth.getCurrentUser();
         DataSingleton.getDataSingleton().setCurrentUserID(currentUser.getUid());
@@ -189,7 +199,8 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             }
         });
     }
-    private void  getUsersIDs(){
+
+    private void getUsersIDs() {
         usersSongCollRef = new HashMap<String, String>();
         usersIDAndBio = new HashMap<String, String>();
 
@@ -213,9 +224,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
                         String isArtistString = String.valueOf(document.get("isArtist"));
                         isArtist = Boolean.valueOf(isArtistString);
-                        if (isArtist){
+                        if (isArtist) {
                             user.setArtist(true);
-                        }else {
+                        } else {
                             user.setArtist(false);
                         }
 
@@ -230,11 +241,11 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     }
 
 
-    private void getSongsDocuments(){
+    private void getSongsDocuments() {
         Log.d("allSongs", usersSongCollRef.toString());
         Log.d("brojPoziva", "POZIV");
 
-        for(Map.Entry<String, String> entry: usersSongCollRef.entrySet()){
+        for (Map.Entry<String, String> entry : usersSongCollRef.entrySet()) {
             CollectionReference userSongColl = db.collection("users/" + entry.getKey() + "/songs");
             Log.d("allSongs", "looking for user: " + entry.getKey());
 
@@ -277,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                     numOfSongsFetched += 1;
 
                     Log.d("allSongs", String.valueOf(numOfSongsFetched) + " " + String.valueOf(usersSongCollRef.size()));
-                    if(numOfSongsFetched == usersSongCollRef.size()){
+                    if (numOfSongsFetched == usersSongCollRef.size()) {
                         getAllArtists();
                         updateSongsWithAlbumData();
                         getSongsURL();
@@ -290,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         getAlbumData();
     }
 
-    private void getAlbumData(){
+    private void getAlbumData() {
         CollectionReference albums = db.collection("albums/");
         albums.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -325,9 +336,10 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             }
         });
     }
-    private void getAllArtists(){
-        for (Song song: allSongs){
-            if(!allArtists.contains(song.getArtistName())){
+
+    private void getAllArtists() {
+        for (Song song : allSongs) {
+            if (!allArtists.contains(song.getArtistName())) {
                 allArtists.add(song.getArtistName());
             }
         }
@@ -335,14 +347,15 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         Log.d("allartists", allArtists.toString());
         DataSingleton.getDataSingleton().setAllArtists(allArtists);
     }
-    private void   updateSongsWithAlbumData(){
-        for(Song song: allSongs){
+
+    private void updateSongsWithAlbumData() {
+        for (Song song : allSongs) {
             String songAlbumID = song.getAlbumUUDI();
-            for (Album album: allAlbums){
-                if(album.getAlbumID().equals(songAlbumID)){
+            for (Album album : allAlbums) {
+                if (album.getAlbumID().equals(songAlbumID)) {
                     song.setAlbumName(album.getAlbumName());
                     song.setReleaseDate(album.getReleaseDate());
-                    Log.d("songAlbum", songAlbumID + "  "+ album.getAlbumID());
+                    Log.d("songAlbum", songAlbumID + "  " + album.getAlbumID());
                     Log.d("songAlbum", song.getReleaseDate().toString());
                 }
             }
@@ -352,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
     }
 
-    private  void  getSongsURL() {
+    private void getSongsURL() {
 
 
         for (Song song : allSongs) {
@@ -364,14 +377,14 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                     public void onSuccess(Uri downloadUrl) {
 
                         //Log.d("URLgetzika", song.getSongPath());
-                        if(song.getSongPath() == null){
+                        if (song.getSongPath() == null) {
                             song.setSongPath(downloadUrl.toString());
 
                         }
                         Log.d("URLgetzika", String.valueOf(song.getSongPath()));
                         Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
                         numOfURLsFetched += 1;
-                        if(numOfURLsFetched == allSongs.size()){
+                        if (numOfURLsFetched == allSongs.size()) {
                             DataSingleton.getDataSingleton().setAllSongs(allSongs);
                             Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
                         }
@@ -383,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         numOfURLsFetched += 1;
-                        if(numOfURLsFetched == allSongs.size()){
+                        if (numOfURLsFetched == allSongs.size()) {
                             DataSingleton.getDataSingleton().setAllSongs(allSongs);
                             Toast.makeText(MainActivity.this, "Data load finished", Toast.LENGTH_SHORT).show();
                             libraryFragment.dataUpdate();
@@ -391,13 +404,14 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         e.printStackTrace();
                     }
                 });
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
         }
     }
-    public void getAllBackendData(){
+
+    public void getAllBackendData() {
         allSongs = new ArrayList<>();
         allAlbums = new ArrayList<>();
         allArtists = new ArrayList<>();
