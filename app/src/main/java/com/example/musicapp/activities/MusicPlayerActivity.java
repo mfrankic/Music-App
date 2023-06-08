@@ -1,4 +1,4 @@
-package com.example.musicapp;
+package com.example.musicapp.activities;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -16,6 +16,9 @@ import android.widget.SeekBar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.musicapp.services.MusicPlayerService;
+import com.example.musicapp.R;
+import com.example.musicapp.entities.TempSong;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textview.MaterialTextView;
 

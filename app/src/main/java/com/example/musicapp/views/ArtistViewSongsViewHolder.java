@@ -1,4 +1,4 @@
-package com.example.musicapp;
+package com.example.musicapp.views;
 
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -13,22 +13,25 @@ import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
+import com.example.musicapp.entities.DataSingleton;
+import com.example.musicapp.R;
+import com.example.musicapp.entities.Song;
+import com.example.musicapp.activities.MusicPlayerActivity;
 
-public class ArtistViewSongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener{
+public class ArtistViewSongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener {
 
 
-    TextView songName;
+    public TextView songName;
     String songFileUUID;
     private Context context;
     View view;
     //MainActivity activity;
     //String artistID;
 
-    public ArtistViewSongsViewHolder(View itemView, Context context){
+    public ArtistViewSongsViewHolder(View itemView, Context context) {
         super(itemView);
-        songName = (TextView)itemView.findViewById(R.id.artist_view_song_name);
-        view  = itemView;
+        songName = (TextView) itemView.findViewById(R.id.artist_view_song_name);
+        view = itemView;
         this.context = context;
         itemView.setOnClickListener(this);
         itemView.setOnLongClickListener(this);
@@ -36,7 +39,7 @@ public class ArtistViewSongsViewHolder extends RecyclerView.ViewHolder implement
     }
 
     @Override
-    public void onClick(View v){
+    public void onClick(View v) {
 
         Intent intent = new Intent(context, MusicPlayerActivity.class);
         ActivityOptions options = ActivityOptions.makeCustomAnimation(context, R.anim.slide_in_up, R.anim.fade_out);
@@ -44,13 +47,12 @@ public class ArtistViewSongsViewHolder extends RecyclerView.ViewHolder implement
     }
 
     @Override
-    public boolean onLongClick(View v){
+    public boolean onLongClick(View v) {
         PopupMenu popup = new PopupMenu(context, v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.artist_song_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(this);
         popup.show();
-
 
 
         return true;
@@ -76,10 +78,9 @@ public class ArtistViewSongsViewHolder extends RecyclerView.ViewHolder implement
     }
 
 
-
-    private void addSongToQueue(){
-        for(Song song: DataSingleton.getDataSingleton().getAllSongs()){
-            if(song.getSongFileUUID().equals(this.songFileUUID)){
+    private void addSongToQueue() {
+        for (Song song : DataSingleton.getDataSingleton().getAllSongs()) {
+            if (song.getSongFileUUID().equals(this.songFileUUID)) {
                 DataSingleton.getDataSingleton().getSongsQueue().add(song);
             }
         }

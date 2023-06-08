@@ -1,8 +1,6 @@
-package com.example.musicapp;
+package com.example.musicapp.fragments;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,19 +8,18 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicapp.entities.Album;
+import com.example.musicapp.entities.DataSingleton;
+import com.example.musicapp.R;
+import com.example.musicapp.entities.Song;
+import com.example.musicapp.activities.MainActivity;
+import com.example.musicapp.adapters.ArtistViewAlbumsAdapter;
+import com.example.musicapp.adapters.ArtistViewSongsAdapter;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 
@@ -111,16 +108,16 @@ public class ArtistViewFragment extends Fragment {
         }
     }
 
-    private void getNameAndBio(){
-        for(Song song: DataSingleton.getDataSingleton().getAllSongs()){
-            if(song.getArtistID().equals(this.artistID)){
+    private void getNameAndBio() {
+        for (Song song : DataSingleton.getDataSingleton().getAllSongs()) {
+            if (song.getArtistID().equals(this.artistID)) {
                 artistName = song.getArtistName();
                 artistBio = song.getArtistBio();
             }
         }
     }
 
-    public void setArtistID(String artistID){
+    public void setArtistID(String artistID) {
         this.artistID = artistID;
 
     }

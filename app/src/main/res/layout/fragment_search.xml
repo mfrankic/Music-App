@@ -70,10 +70,6 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-
-
-
-
     <!-- Main content of the activity -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/main_content"
@@ -81,7 +77,6 @@
         android:layout_height="match_parent"
         android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
 
 
         <LinearLayout
@@ -95,12 +90,11 @@
                 android:orientation="horizontal">
 
 
-
                 <EditText
                     android:layout_width="250dp"
                     android:layout_height="wrap_content"
                     android:id="@+id/song_search"
-                    android:text="Search for songs"></EditText>
+                    android:hint="Search for songs"></EditText>
 
                 <Space
                     android:layout_width="0dp"
@@ -113,7 +107,7 @@
                     android:layout_height="wrap_content"
                     android:text="search"
                     android:textSize="12sp"
-                    android:layout_gravity="end" ></com.google.android.material.button.MaterialButton>
+                    android:layout_gravity="end"></com.google.android.material.button.MaterialButton>
 
             </LinearLayout>
 

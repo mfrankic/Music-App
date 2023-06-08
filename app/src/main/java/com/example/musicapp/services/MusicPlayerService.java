@@ -1,4 +1,4 @@
-package com.example.musicapp;
+package com.example.musicapp.services;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -24,6 +24,10 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.media.MediaBrowserServiceCompat;
 import androidx.media.session.MediaButtonReceiver;
+
+import com.example.musicapp.R;
+import com.example.musicapp.entities.TempSong;
+import com.example.musicapp.activities.MainActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;

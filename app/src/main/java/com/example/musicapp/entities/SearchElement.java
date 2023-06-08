@@ -1,10 +1,11 @@
-package com.example.musicapp;
+package com.example.musicapp.entities;
 
 public class SearchElement {
 
     public Song song;
     public Album album;
     public String elementName, elementType;
+
     public SearchElement() {
     }
 
