@@ -38,7 +38,7 @@
 
                 <!-- Button for creating a new playlist -->
                 <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/notification_button"
+                    android:id="@+id/create_playlist_button"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"

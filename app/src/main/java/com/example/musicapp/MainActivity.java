@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     protected final SettingsFragment settingsFragment = new SettingsFragment();
     public final LibraryFragment libraryFragment = new LibraryFragment();
     protected  ArtistViewFragment artistViewFragment = new ArtistViewFragment();
+    protected PlaylistCreateFragment playlistCreateFragment = new PlaylistCreateFragment();
 
     private View uploadButtonItem;
 

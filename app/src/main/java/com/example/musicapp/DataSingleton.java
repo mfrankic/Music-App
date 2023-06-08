@@ -18,11 +18,12 @@ public class DataSingleton {
     private static DataSingleton instance;
 
     private static ArrayList<Song> allSongs, songsQueue;
+    public static ArrayList<Song> playlistCreateSongs;
     private static ArrayList<String> allArtists, songPaths;
     private static ArrayList<Album> allAlbums;
 
-    private static int numOfFetchedURLs;
     private static String currentUserName, currentUserID, currentUserBio;
+
 
     private DataSingleton(){
 
@@ -104,6 +105,28 @@ public class DataSingleton {
 
     public  void setCurrentUserBio(String currentUserBio) {
         DataSingleton.currentUserBio = currentUserBio;
+    }
+
+    public ArrayList<Song> getPlaylistCreateSongs() {
+        return playlistCreateSongs;
+    }
+
+    public  void setPlaylistCreateSongs(ArrayList<Song> playlistCreateSongs) {
+        DataSingleton.playlistCreateSongs = playlistCreateSongs;
+    }
+
+    public void addPlaylistCreateSongs(Song song){
+        this.playlistCreateSongs.add(song);
+    }
+    public void removeFromPlaylistCreateSongs(Song removeSong){
+        ArrayList<Song> tmpList = new ArrayList<>();
+        for(Song song: playlistCreateSongs){
+            if(!song.getSongFileUUID().equals(removeSong.getSongFileUUID())){
+                tmpList.add(song);
+            }
+        }
+
+        playlistCreateSongs = tmpList;
     }
 }
 
