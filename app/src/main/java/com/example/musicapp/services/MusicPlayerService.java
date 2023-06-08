@@ -1,6 +1,8 @@
 package com.example.musicapp.services;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
@@ -17,6 +19,7 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -26,8 +29,8 @@ import androidx.media.MediaBrowserServiceCompat;
 import androidx.media.session.MediaButtonReceiver;
 
 import com.example.musicapp.R;
-import com.example.musicapp.entities.TempSong;
 import com.example.musicapp.activities.MainActivity;
+import com.example.musicapp.entities.TempSong;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,6 +64,13 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     public void onCreate() {
         super.onCreate();
         isRunning = true;
+
+        // create channel for notification
+        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "Music Player Service", NotificationManager.IMPORTANCE_DEFAULT);
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
 
         mediaSession = new MediaSessionCompat(this, "MyMusicService");
         mediaSession.setMediaButtonReceiver(null);
@@ -138,6 +148,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                 }
                 return super.onMediaButtonEvent(mediaButtonEvent);
             }
+
         });
     }
 
@@ -261,8 +272,8 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             mediaItems = new ArrayList<>();
 
             // TODO: get songs from firebase or change sending items from activity
-            TempSong firstSong = new TempSong(songIdsList.get(0), "Don Omar", "Danza Kuduro", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
-            TempSong secondSong = new TempSong(songIdsList.get(1), "Akon", "Smack That", "Konvicted", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2FAkon%20-%20Smack%20That%20(Official%20Music%20Video)%20ft.%20Eminem.mp3?alt=media&token=f728aafc-0cb6-4270-b07b-f3ec40abd347");
+            TempSong firstSong = new TempSong(songIdsList.get(0), "Danza Kuduro", "Don Omar", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
+            TempSong secondSong = new TempSong(songIdsList.get(1), "In Da Club", "50 Cent", "Get Rich or Die Tryin'", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2Fde4d5dcf-6d7c-4b60-87bb-6a0f044d1923.mp3?alt=media&token=0e420a8f-92c2-4f1a-8aba-0ae79de098d5");
 
             ArrayList<TempSong> newList = new ArrayList<>();
             newList.add(firstSong);
@@ -337,12 +348,16 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
         }
     }
 
+    private void clearMediaPlayer() {
+        mediaPlayer.stop();
+        mediaPlayer.reset();
+        mediaPlayer.release();
+        mediaPlayer = null;
+    }
+
     private void stop() {
         if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.reset();
-            mediaPlayer.release();
-            mediaPlayer = null;
+            clearMediaPlayer();
             updatePlaybackState(PlaybackStateCompat.ACTION_STOP);
         }
     }
@@ -350,7 +365,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private void skipToNext() {
         if (mediaPlayer != null && songList != null && mCurrentSongIndex < songList.size() - 1) {
             mCurrentSongIndex++;
-            stop();
+            clearMediaPlayer();
             play();
             updatePlaybackState(PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
         }
@@ -359,7 +374,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private void skipToPrevious() {
         if (mediaPlayer != null && mCurrentSongIndex > 0) {
             mCurrentSongIndex--;
-            stop();
+            clearMediaPlayer();
             play();
             updatePlaybackState(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
         }
@@ -400,10 +415,14 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
         builder.addAction(new NotificationCompat.Action(R.drawable.ic_next, "Next",
                 MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT)));
 
+        // Add stop action
+        builder.addAction(new NotificationCompat.Action(R.drawable.ic_stop, "Stop",
+                MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_STOP)));
+
         // Apply the media style template
         builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                 .setMediaSession(mediaSession.getSessionToken())
-                .setShowActionsInCompactView(0, 1, 2) // indices for "play/pause", "next" and "previous" actions
+                .setShowActionsInCompactView(0, 1, 2, 3) // indices for "play/pause", "next" and "previous" actions
                 .setShowCancelButton(true)
                 .setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_STOP)));
 
@@ -414,6 +433,13 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
         Intent openUI = new Intent(this, MainActivity.class);
         openUI.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return PendingIntent.getActivity(this, REQUEST_CODE, openUI, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    private PendingIntent closeIntent() {
+        Intent closeIntent = new Intent(this, MusicPlayerService.class);
+        closeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        closeIntent.putExtra("destroyCode", 666);
+        return PendingIntent.getService(this, 0, closeIntent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     private void updatePlaybackState(long action) {
@@ -444,6 +470,8 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             }
         }
         mediaSession.setPlaybackState(stateBuilder.build());
+
+        Log.d("TAG", "updatePlaybackState: " + action);
 
         if (action != PlaybackStateCompat.ACTION_STOP) {
             // Now that the state is updated, notify the service to become active
