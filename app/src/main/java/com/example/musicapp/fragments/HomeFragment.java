@@ -1,6 +1,7 @@
 package com.example.musicapp.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +12,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.musicapp.entities.CarouselItem;
 import com.example.musicapp.R;
 import com.example.musicapp.activities.MainActivity;
 import com.example.musicapp.adapters.CarouselAdapter;
+import com.example.musicapp.entities.CarouselItem;
+import com.example.musicapp.entities.Song;
 import com.google.android.material.textview.MaterialTextView;
 
 import java.util.ArrayList;
@@ -22,6 +24,8 @@ import java.util.Calendar;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
+
+    ArrayList<Song> allSongs = new ArrayList<>();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -41,6 +45,12 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        if (getArguments() != null) {
+            allSongs = getArguments().getParcelableArrayList("allSongs");
+        }
+
+        Log.d("HomeFragment", "onViewCreated: " + allSongs.toString());
 
         MainActivity activity = (MainActivity) getActivity();
         assert activity != null;
@@ -84,16 +94,20 @@ public class HomeFragment extends Fragment {
 
         List<CarouselItem> items = new ArrayList<>();
 
-        items.add(new CarouselItem(R.drawable.playlist_image, "Album 1"));
-        items.add(new CarouselItem(R.drawable.playlist_or_artist_image, "Album 2"));
-        items.add(new CarouselItem(R.drawable.playlist_image, "Album 3"));
-        items.add(new CarouselItem(R.drawable.playlist_or_artist_image, "Album 4"));
-        items.add(new CarouselItem(R.drawable.playlist_image, "Album 5"));
-        items.add(new CarouselItem(R.drawable.playlist_or_artist_image, "Album 6"));
-        items.add(new CarouselItem(R.drawable.playlist_image, "Album 7"));
-        items.add(new CarouselItem(R.drawable.playlist_or_artist_image, "Album 8"));
-        items.add(new CarouselItem(R.drawable.playlist_image, "Album 9"));
-        items.add(new CarouselItem(R.drawable.playlist_or_artist_image, "Album 10"));
+        for (Song song : allSongs) {
+            items.add(new CarouselItem(R.drawable.playlist_image, song.getSongName()));
+        }
+
+//        items.add(new CarouselItem(R.drawable.playlist_image, "Album 1"));
+//        items.add(new CarouselItem(R.drawable.playlist_or_artist_image, "Album 2"));
+//        items.add(new CarouselItem(R.drawable.playlist_image, "Album 3"));
+//        items.add(new CarouselItem(R.drawable.playlist_or_artist_image, "Album 4"));
+//        items.add(new CarouselItem(R.drawable.playlist_image, "Album 5"));
+//        items.add(new CarouselItem(R.drawable.playlist_or_artist_image, "Album 6"));
+//        items.add(new CarouselItem(R.drawable.playlist_image, "Album 7"));
+//        items.add(new CarouselItem(R.drawable.playlist_or_artist_image, "Album 8"));
+//        items.add(new CarouselItem(R.drawable.playlist_image, "Album 9"));
+//        items.add(new CarouselItem(R.drawable.playlist_or_artist_image, "Album 10"));
 
 
         RecyclerView recommendedRecyclerView = view.findViewById(R.id.recommended_recycler);
