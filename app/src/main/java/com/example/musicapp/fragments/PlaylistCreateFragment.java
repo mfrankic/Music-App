@@ -1,29 +1,33 @@
-package com.example.musicapp;
+package com.example.musicapp.fragments;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicapp.activities.MainActivity;
+import com.example.musicapp.adapters.PlaylistCreateViewAdapter;
+import com.example.musicapp.R;
+import com.example.musicapp.entities.DataSingleton;
+import com.example.musicapp.entities.Playlist;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class PlaylistCreateFragment extends Fragment {
 
@@ -32,7 +36,8 @@ public class PlaylistCreateFragment extends Fragment {
     private LinearLayoutManager allSongsViewManager;
     private PlaylistCreateViewAdapter songsViewAdapter;
     private Button createPlaylistBtn;
-
+    private EditText playlistName;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     public PlaylistCreateFragment() {
         // Required empty public constructor
     }
@@ -61,10 +66,42 @@ public class PlaylistCreateFragment extends Fragment {
                 .replace(R.id.main_fragment_container, activity.homeFragment)
                 .commit());
 
+        playlistName = view.findViewById(R.id.playlist_name);
         createPlaylistBtn = view.findViewById(R.id.create_playlist_button);
         createPlaylistBtn.setOnClickListener(v -> {
-                    Log.d("createPlaylist", DataSingleton.getDataSingleton().getPlaylistCreateSongs().toString());
-                }
+            Log.d("createPlaylist", DataSingleton.getDataSingleton().getPlaylistCreateSongs().toString());
+
+            // create playlist object
+            Playlist playlist = new Playlist();
+            playlist.setPlaylistSongs(DataSingleton.getDataSingleton().getPlaylistCreateSongs());
+            playlist.setPlaylistName(playlistName.getText().toString());
+            playlist.setCreatorID(DataSingleton.getDataSingleton().getCurrentUserID());
+            playlist.setCreatorName(DataSingleton.getDataSingleton().getCurrentUserName());
+
+
+            //UPLOAD TO BACKEND
+            // Create UUID
+            UUID uuid = UUID.randomUUID();
+            String uuidString = uuid.toString();
+
+            Map<String, Object> playlistData = new HashMap<>();
+            playlistData.put("name", playlist.getPlaylistName());
+            playlistData.put("creatorName", playlist.getCreatorName());
+            playlistData.put("creatorID", playlist.getCreatorID());
+            playlistData.put("songs", playlist.getSongsIDs());
+
+            CollectionReference playlistColl = db.collection("playlist");
+            playlistColl.document(uuidString).set(playlistData).addOnSuccessListener(aVoid -> {
+                Toast.makeText(getContext(), "Playlist Created", Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e -> Log.w("TAG", "Error writing document", e));
+
+            // Clear tmp array for playlist creation
+            DataSingleton.getDataSingleton().playlistCreateSongs = new ArrayList<>();
+
+            // Refresh backend data
+            activity.getAllBackendData();
+
+            }
         );
 
         allSongsView = view.findViewById(R.id.playlist_create_fragment_all_songs_view);

@@ -1,4 +1,4 @@
-package com.example.musicapp;
+package com.example.musicapp.views;
 
 import android.content.Context;
 import android.view.MenuInflater;
@@ -7,6 +7,10 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+
+import com.example.musicapp.R;
+import com.example.musicapp.entities.DataSingleton;
+import com.example.musicapp.entities.Song;
 
 public class PlaylistCreateViewHolder extends SongsViewHolder implements CheckBox.OnCheckedChangeListener{
 
