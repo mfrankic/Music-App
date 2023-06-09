@@ -81,6 +81,12 @@ public class HomeFragment extends Fragment {
                 .replace(R.id.main_fragment_container, activity.settingsFragment)
                 .commit());
 
+        AppCompatImageButton createPlaylistButton = view.findViewById(R.id.create_playlist_button);
+        createPlaylistButton.setOnClickListener(v -> activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment_container, activity.playlistCreateFragment)
+                .commit());
+
 
         List<CarouselItem> items = new ArrayList<>();
 
