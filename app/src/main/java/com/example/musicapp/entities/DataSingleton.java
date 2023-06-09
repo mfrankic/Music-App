@@ -7,8 +7,12 @@ public class DataSingleton {
     private static DataSingleton instance;
 
     private static ArrayList<Song> allSongs, songsQueue;
+
+    // Tmp list used for playlist creation
+    public static ArrayList<Song> playlistCreateSongs;
     private static ArrayList<String> allArtists, songPaths;
     private static ArrayList<Album> allAlbums;
+    private static ArrayList<Playlist> allPlaylists;
 
     private static int numOfFetchedURLs;
     private static String currentUserName, currentUserID, currentUserBio;
@@ -95,6 +99,35 @@ public class DataSingleton {
 
     public void setCurrentUserBio(String currentUserBio) {
         DataSingleton.currentUserBio = currentUserBio;
+    }
+
+    public ArrayList<Song> getPlaylistCreateSongs() {
+        return playlistCreateSongs;
+    }
+    public  void setPlaylistCreateSongs(ArrayList<Song> playlistCreateSongs) {
+        DataSingleton.playlistCreateSongs = playlistCreateSongs;
+    }
+
+    public void addPlaylistCreateSongs(Song song){
+        this.playlistCreateSongs.add(song);
+    }
+    public void removeFromPlaylistCreateSongs(Song removeSong){
+        ArrayList<Song> tmpList = new ArrayList<>();
+        for(Song song: playlistCreateSongs){
+            if(!song.getSongFileUUID().equals(removeSong.getSongFileUUID())){
+                tmpList.add(song);
+            }
+        }
+
+        playlistCreateSongs = tmpList;
+    }
+
+    public  ArrayList<Playlist> getAllPlaylists() {
+        return allPlaylists;
+    }
+
+    public  void setAllPlaylists(ArrayList<Playlist> playlists) {
+        DataSingleton.allPlaylists = playlists;
     }
 }
 

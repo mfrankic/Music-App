@@ -44,6 +44,14 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         this.activity = activity;
     }
 
+    public SongsViewHolder(View itemView, Context context){
+        super(itemView);
+        this.context = context;
+        songName = (TextView)itemView.findViewById(R.id.library_song_name);
+        artistName = (TextView)itemView.findViewById(R.id.library_artist_name);
+
+    }
+
     @Override
     public void onClick(View v) {
         Log.d("onesong", "Stisnuto");

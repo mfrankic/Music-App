@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,11 +22,14 @@ import androidx.preference.PreferenceManager;
 import com.example.musicapp.R;
 import com.example.musicapp.entities.Album;
 import com.example.musicapp.entities.DataSingleton;
+
+import com.example.musicapp.entities.Playlist;
 import com.example.musicapp.entities.Song;
 import com.example.musicapp.entities.User;
 import com.example.musicapp.fragments.ArtistViewFragment;
 import com.example.musicapp.fragments.HomeFragment;
 import com.example.musicapp.fragments.LibraryFragment;
+import com.example.musicapp.fragments.PlaylistCreateFragment;
 import com.example.musicapp.fragments.SearchFragment;
 import com.example.musicapp.fragments.SettingsFragment;
 import com.example.musicapp.fragments.UploadSongFragment;
@@ -59,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     public final SettingsFragment settingsFragment = new SettingsFragment();
     public final LibraryFragment libraryFragment = new LibraryFragment();
     public ArtistViewFragment artistViewFragment = new ArtistViewFragment();
+    public PlaylistCreateFragment playlistCreateFragment = new PlaylistCreateFragment();
 
     private View uploadButtonItem;
 
@@ -302,6 +307,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         getAllArtists();
                         updateSongsWithAlbumData();
                         getSongsURL();
+
                     }
                 }
             });
@@ -396,6 +402,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         numOfURLsFetched += 1;
                         if (numOfURLsFetched == allSongs.size()) {
                             DataSingleton.getDataSingleton().setAllSongs(allSongs);
+                            getPlaylists();
                             Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
                         }
                         Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
@@ -408,6 +415,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         numOfURLsFetched += 1;
                         if (numOfURLsFetched == allSongs.size()) {
                             DataSingleton.getDataSingleton().setAllSongs(allSongs);
+                            getPlaylists();
                             Toast.makeText(MainActivity.this, "Data load finished", Toast.LENGTH_SHORT).show();
                             libraryFragment.dataUpdate();
                         }
@@ -419,6 +427,46 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             }
 
         }
+    }
+
+    public void getPlaylists(){
+        ArrayList<Playlist> allPlaylists = new ArrayList<>();
+
+        CollectionReference playlistColl = db.collection("playlist");
+        playlistColl.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+
+                        Playlist playlist = new Playlist();
+                        playlist.setPlaylistName(document.getString("name"));
+                        playlist.setCreatorID(document.getString("creatorID"));
+                        playlist.setCreatorName(document.getString("creatorName"));
+                        ArrayList<Song> playlistSongs = new ArrayList<>();
+                        ArrayList<String> playlistSongsIDs = (ArrayList<String>) (document.get("songs"));
+                        for(String songID: playlistSongsIDs){
+                            for(Song song: allSongs){
+                                if(songID.equals(song.getSongFileUUID())){
+                                    playlistSongs.add(song);
+                                }
+                            }
+                        }
+                        playlist.setPlaylistSongs(playlistSongs);
+
+                        allPlaylists.add(playlist);
+
+                    }
+
+                DataSingleton.getDataSingleton().setAllPlaylists(allPlaylists);
+                Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
+                Log.d("playlistLoad", DataSingleton.getDataSingleton().getAllPlaylists().toString());
+                }
+
+             else {
+                //Log.d(TAG, "Error getting documents: ", task.getException());
+            }
+
+        });
+
     }
 
     public void getAllBackendData() {
