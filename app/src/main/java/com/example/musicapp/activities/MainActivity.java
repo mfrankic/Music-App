@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,7 +21,6 @@ import androidx.preference.PreferenceManager;
 import com.example.musicapp.R;
 import com.example.musicapp.entities.Album;
 import com.example.musicapp.entities.DataSingleton;
-
 import com.example.musicapp.entities.Playlist;
 import com.example.musicapp.entities.Song;
 import com.example.musicapp.entities.User;
@@ -84,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     private Map<String, String> usersIDAndBio;
     boolean userIDsFetchfinished, songsFetchFinished, albumsFetchFinished;
     private int numOfSongsFetched, numOfURLsFetched;
+    private Handler loadDataHandler = new Handler();
 
 
     private SharedPreferences.OnSharedPreferenceChangeListener sharedPrefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -429,7 +428,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         }
     }
 
-    public void getPlaylists(){
+    public void getPlaylists() {
         ArrayList<Playlist> allPlaylists = new ArrayList<>();
 
         CollectionReference playlistColl = db.collection("playlist");
@@ -437,31 +436,29 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
 
-                        Playlist playlist = new Playlist();
-                        playlist.setPlaylistName(document.getString("name"));
-                        playlist.setCreatorID(document.getString("creatorID"));
-                        playlist.setCreatorName(document.getString("creatorName"));
-                        ArrayList<Song> playlistSongs = new ArrayList<>();
-                        ArrayList<String> playlistSongsIDs = (ArrayList<String>) (document.get("songs"));
-                        for(String songID: playlistSongsIDs){
-                            for(Song song: allSongs){
-                                if(songID.equals(song.getSongFileUUID())){
-                                    playlistSongs.add(song);
-                                }
+                    Playlist playlist = new Playlist();
+                    playlist.setPlaylistName(document.getString("name"));
+                    playlist.setCreatorID(document.getString("creatorID"));
+                    playlist.setCreatorName(document.getString("creatorName"));
+                    ArrayList<Song> playlistSongs = new ArrayList<>();
+                    ArrayList<String> playlistSongsIDs = (ArrayList<String>) (document.get("songs"));
+                    for (String songID : playlistSongsIDs) {
+                        for (Song song : allSongs) {
+                            if (songID.equals(song.getSongFileUUID())) {
+                                playlistSongs.add(song);
                             }
                         }
-                        playlist.setPlaylistSongs(playlistSongs);
-
-                        allPlaylists.add(playlist);
-
                     }
+                    playlist.setPlaylistSongs(playlistSongs);
+
+                    allPlaylists.add(playlist);
+
+                }
 
                 DataSingleton.getDataSingleton().setAllPlaylists(allPlaylists);
                 Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
                 Log.d("playlistLoad", DataSingleton.getDataSingleton().getAllPlaylists().toString());
-                }
-
-             else {
+            } else {
                 //Log.d(TAG, "Error getting documents: ", task.getException());
             }
 
@@ -513,19 +510,17 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.home_button) {
-            Log.d("MainActivity", "Home button clicked");
-            // wait for allSongs to be fetched from backend before switching to home fragment
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_fragment_container, homeFragment);
+
             if (allSongs != null && allSongs.size() > 0) {
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.main_fragment_container, homeFragment)
-                        .commit();
+                Log.d("MainActivity", allSongs.toString());
+                fragmentTransaction.commit();
                 return true;
             }
-            Toast.makeText(MainActivity.this, "Please wait for data to load", Toast.LENGTH_SHORT).show();
             // try again until allSongs is fetched
-            Handler handler = new Handler();
-            handler.postDelayed(() -> onNavigationItemSelected(item), 1000);
+            loadDataHandler.postDelayed(() -> onNavigationItemSelected(item), 200);
 
             return false;
         } else if (itemId == R.id.search_button) {
