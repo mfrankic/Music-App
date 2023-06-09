@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,11 +15,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 
+import com.example.musicapp.R;
 import com.example.musicapp.entities.Album;
 import com.example.musicapp.entities.DataSingleton;
-import com.example.musicapp.R;
 import com.example.musicapp.entities.Song;
 import com.example.musicapp.entities.User;
 import com.example.musicapp.fragments.ArtistViewFragment;
@@ -272,6 +274,14 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
                             allSongs.add(song);
                         }
+
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelableArrayList("allSongs", allSongs);
+
+                        homeFragment.setArguments(bundle);
+                        // refresh fragment
+                        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                        ft.detach(homeFragment).attach(homeFragment).commit();
                     } else {
                         Log.d("allSongs", "Error getting documents: ", task.getException());
                     }
@@ -455,12 +465,21 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.home_button) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.main_fragment_container, homeFragment)
-                    .commit();
-            //isArtistChange();
-            return true;
+            Log.d("MainActivity", "Home button clicked");
+            // wait for allSongs to be fetched from backend before switching to home fragment
+            if (allSongs != null && allSongs.size() > 0) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_fragment_container, homeFragment)
+                        .commit();
+                return true;
+            }
+            Toast.makeText(MainActivity.this, "Please wait for data to load", Toast.LENGTH_SHORT).show();
+            // try again until allSongs is fetched
+            Handler handler = new Handler();
+            handler.postDelayed(() -> onNavigationItemSelected(item), 1000);
+
+            return false;
         } else if (itemId == R.id.search_button) {
             Log.d("MainActivity", "Search button clicked");
             getSupportFragmentManager()

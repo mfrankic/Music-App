@@ -1,15 +1,65 @@
 package com.example.musicapp.entities;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.sql.Timestamp;
 
-public class Song {
+public class Song implements Parcelable {
 
     private String songName, artistName, songFileUUID, genre, artistID, albumUUDI, albumName, songPath, artistBio;
     private Timestamp releaseDate;
     private int numberOfLikes, numberOfListens;
 
     public Song() {
+    }
 
+    public Song(Parcel in) {
+        songName = in.readString();
+        artistName = in.readString();
+        songFileUUID = in.readString();
+        genre = in.readString();
+        artistID = in.readString();
+        albumUUDI = in.readString();
+        albumName = in.readString();
+        songPath = in.readString();
+        artistBio = in.readString();
+        releaseDate = (Timestamp) in.readSerializable();
+        numberOfLikes = in.readInt();
+        numberOfListens = in.readInt();
+    }
+
+    public static final Creator<Song> CREATOR = new Creator<Song>() {
+        @Override
+        public Song createFromParcel(Parcel in) {
+            return new Song(in);
+        }
+
+        @Override
+        public Song[] newArray(int size) {
+            return new Song[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int i) {
+        dest.writeString(songName);
+        dest.writeString(artistName);
+        dest.writeString(songFileUUID);
+        dest.writeString(genre);
+        dest.writeString(artistID);
+        dest.writeString(albumUUDI);
+        dest.writeString(albumName);
+        dest.writeString(songPath);
+        dest.writeString(artistBio);
+        dest.writeSerializable(releaseDate);
+        dest.writeInt(numberOfLikes);
+        dest.writeInt(numberOfListens);
     }
 
     public Timestamp getReleaseDate() {
