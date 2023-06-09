@@ -542,7 +542,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             //isArtistChange();
             return true;
         } else if (itemId == R.id.upload_song_button) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, uploadSongFragment).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, uploadSongFragment).addToBackStack(null).commit();
             Log.d("MainActivity", "Upload song clicked");
             //isArtistChange();
             return true;

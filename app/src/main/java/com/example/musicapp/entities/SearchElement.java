@@ -4,6 +4,7 @@ public class SearchElement {
 
     public Song song;
     public Album album;
+    public Playlist playlist;
     public String elementName, elementType;
 
     public SearchElement() {
@@ -40,5 +41,13 @@ public class SearchElement {
 
     public void setElementType(String elementType) {
         this.elementType = elementType;
+    }
+
+    public Playlist getPlaylist() {
+        return playlist;
+    }
+
+    public void setPlaylist(Playlist playlist) {
+        this.playlist = playlist;
     }
 }

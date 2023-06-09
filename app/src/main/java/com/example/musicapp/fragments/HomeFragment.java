@@ -89,6 +89,7 @@ public class HomeFragment extends Fragment {
         settingsButton.setOnClickListener(v -> activity.getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.main_fragment_container, activity.settingsFragment)
+                .addToBackStack("settings")
                 .commit());
 
         AppCompatImageButton createPlaylistButton = view.findViewById(R.id.create_playlist_button);
