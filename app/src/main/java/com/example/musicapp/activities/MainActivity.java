@@ -438,7 +438,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         }
     }
 
-    public void getPlaylists() {
+    public void getPlaylists(){
         ArrayList<Playlist> allPlaylists = new ArrayList<>();
 
         CollectionReference playlistColl = db.collection("playlist");
@@ -446,28 +446,25 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
 
+                    Playlist playlist = new Playlist();
+                    playlist.setPlaylistName(document.getString("name"));
+                    playlist.setCreatorID(document.getString("creatorID"));
+                    playlist.setCreatorName(document.getString("creatorName"));
 
-                        Playlist playlist = new Playlist();
-                        playlist.setPlaylistName(document.getString("name"));
-                        playlist.setCreatorID(document.getString("creatorID"));
-                        playlist.setCreatorName(document.getString("creatorName"));
+                    String isPrivateString = String.valueOf(document.get("private"));
+                    Boolean isPrivate = Boolean.valueOf(isPrivateString);
 
-                        String isPrivateString = String.valueOf(document.get("private"));
-                        Boolean isPrivate = Boolean.valueOf(isPrivateString);
-
-                        if (isPrivate) {
-                            playlist.setPrivate(true);
-                        } else {
-                            playlist.setPrivate(false);
-                        }
-                        ArrayList<Song> playlistSongs = new ArrayList<>();
-                        ArrayList<String> playlistSongsIDs = (ArrayList<String>) (document.get("songs"));
-                        for(String songID: playlistSongsIDs){
-                            for(Song song: allSongs){
-                                if(songID.equals(song.getSongFileUUID())){
-                                    playlistSongs.add(song);
-                                }
-
+                    if (isPrivate) {
+                        playlist.setPrivate(true);
+                    } else {
+                        playlist.setPrivate(false);
+                    }
+                    ArrayList<Song> playlistSongs = new ArrayList<>();
+                    ArrayList<String> playlistSongsIDs = (ArrayList<String>) (document.get("songs"));
+                    for(String songID: playlistSongsIDs){
+                        for(Song song: allSongs){
+                            if(songID.equals(song.getSongFileUUID())){
+                                playlistSongs.add(song);
                             }
                         }
                     }
@@ -480,7 +477,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 DataSingleton.getDataSingleton().setAllPlaylists(allPlaylists);
                 Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
                 Log.d("playlistLoad", DataSingleton.getDataSingleton().getAllPlaylists().toString());
-            } else {
+            }
+
+            else {
                 //Log.d(TAG, "Error getting documents: ", task.getException());
             }
 
