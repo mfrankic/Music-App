@@ -363,6 +363,7 @@ public class LibraryFragment extends Fragment {
         AppCompatImageButton settingsButton = view.findViewById(R.id.settings_button);
         settingsButton.setOnClickListener(v -> activity.getSupportFragmentManager()
                 .beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(R.id.main_fragment_container, activity.settingsFragment)
                 .commit());
 
