@@ -89,6 +89,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                 return true;
             case R.id.artist_profile:
                 activity.artistViewFragment.setArtistID(artistID);
+                activity.artistViewFragment.setCalledFromFragment(activity.libraryFragment);
                 activity.getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.main_fragment_container, activity.artistViewFragment)

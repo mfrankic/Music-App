@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -38,6 +39,7 @@ public class PlaylistCreateFragment extends Fragment {
     private Button createPlaylistBtn;
     private EditText playlistName;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CheckBox privateCheckbox;
     public PlaylistCreateFragment() {
         // Required empty public constructor
     }
@@ -66,6 +68,7 @@ public class PlaylistCreateFragment extends Fragment {
                 .replace(R.id.main_fragment_container, activity.homeFragment)
                 .commit());
 
+        privateCheckbox = view.findViewById(R.id.private_checkbox);
         playlistName = view.findViewById(R.id.playlist_name);
         createPlaylistBtn = view.findViewById(R.id.create_playlist_button);
         createPlaylistBtn.setOnClickListener(v -> {
@@ -89,6 +92,7 @@ public class PlaylistCreateFragment extends Fragment {
             playlistData.put("creatorName", playlist.getCreatorName());
             playlistData.put("creatorID", playlist.getCreatorID());
             playlistData.put("songs", playlist.getSongsIDs());
+            playlistData.put("private", privateCheckbox.isChecked());
 
             CollectionReference playlistColl = db.collection("playlist");
             playlistColl.document(uuidString).set(playlistData).addOnSuccessListener(aVoid -> {

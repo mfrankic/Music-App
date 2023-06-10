@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class User {
 
     private String userName, userBio, userID;
-    private ArrayList<ArrayList<Song>> playlists;
+    private ArrayList<Playlist> playlists;
     private boolean isArtist;
 
     public User() {
@@ -43,11 +43,11 @@ public class User {
         this.userBio = userBio;
     }
 
-    public ArrayList<ArrayList<Song>> getPlaylists() {
+    public ArrayList<Playlist> getPlaylists() {
         return playlists;
     }
 
-    public void setPlaylists(ArrayList<ArrayList<Song>> playlists) {
+    public void setPlaylists(ArrayList<Playlist> playlists) {
         this.playlists = playlists;
     }
 }

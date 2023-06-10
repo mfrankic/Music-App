@@ -24,13 +24,16 @@ import com.example.musicapp.entities.DataSingleton;
 import com.example.musicapp.entities.Playlist;
 import com.example.musicapp.entities.Song;
 import com.example.musicapp.entities.User;
+import com.example.musicapp.fragments.AllUsersViewFragment;
 import com.example.musicapp.fragments.ArtistViewFragment;
 import com.example.musicapp.fragments.HomeFragment;
 import com.example.musicapp.fragments.LibraryFragment;
 import com.example.musicapp.fragments.PlaylistCreateFragment;
 import com.example.musicapp.fragments.SearchFragment;
 import com.example.musicapp.fragments.SettingsFragment;
+import com.example.musicapp.fragments.SocialFragment;
 import com.example.musicapp.fragments.UploadSongFragment;
+import com.example.musicapp.fragments.UserViewFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -62,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     public final LibraryFragment libraryFragment = new LibraryFragment();
     public ArtistViewFragment artistViewFragment = new ArtistViewFragment();
     public PlaylistCreateFragment playlistCreateFragment = new PlaylistCreateFragment();
+    public SocialFragment socialFragment = new SocialFragment();
+    public AllUsersViewFragment allUsersViewFragment = new AllUsersViewFragment();
+    public UserViewFragment userViewFragment = new UserViewFragment();
 
     private View uploadButtonItem;
 
@@ -217,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
+                    ArrayList<User> allUsers = new ArrayList<>();
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Log.d("allSongs", document.getId() + " => " + document.getData());
                         usersSongCollRef.put(document.getId().toString(), document.getString("name"));
@@ -236,7 +243,10 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                             user.setArtist(false);
                         }
 
+                        allUsers.add(user);
+
                     }
+                    DataSingleton.getDataSingleton().setAllUsers(allUsers);
                     userIDsFetchfinished = true;
                     getSongsDocuments();
                 } else {
@@ -436,16 +446,28 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
 
-                    Playlist playlist = new Playlist();
-                    playlist.setPlaylistName(document.getString("name"));
-                    playlist.setCreatorID(document.getString("creatorID"));
-                    playlist.setCreatorName(document.getString("creatorName"));
-                    ArrayList<Song> playlistSongs = new ArrayList<>();
-                    ArrayList<String> playlistSongsIDs = (ArrayList<String>) (document.get("songs"));
-                    for (String songID : playlistSongsIDs) {
-                        for (Song song : allSongs) {
-                            if (songID.equals(song.getSongFileUUID())) {
-                                playlistSongs.add(song);
+
+                        Playlist playlist = new Playlist();
+                        playlist.setPlaylistName(document.getString("name"));
+                        playlist.setCreatorID(document.getString("creatorID"));
+                        playlist.setCreatorName(document.getString("creatorName"));
+
+                        String isPrivateString = String.valueOf(document.get("private"));
+                        Boolean isPrivate = Boolean.valueOf(isPrivateString);
+
+                        if (isPrivate) {
+                            playlist.setPrivate(true);
+                        } else {
+                            playlist.setPrivate(false);
+                        }
+                        ArrayList<Song> playlistSongs = new ArrayList<>();
+                        ArrayList<String> playlistSongsIDs = (ArrayList<String>) (document.get("songs"));
+                        for(String songID: playlistSongsIDs){
+                            for(Song song: allSongs){
+                                if(songID.equals(song.getSongFileUUID())){
+                                    playlistSongs.add(song);
+                                }
+
                             }
                         }
                     }
@@ -512,11 +534,14 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         if (itemId == R.id.home_button) {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager()
                     .beginTransaction()
+                     .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                     .replace(R.id.main_fragment_container, homeFragment);
 
             if (allSongs != null && allSongs.size() > 0) {
+
                 Log.d("MainActivity", allSongs.toString());
                 fragmentTransaction.commit();
+
                 return true;
             }
             // try again until allSongs is fetched
@@ -527,17 +552,18 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             Log.d("MainActivity", "Search button clicked");
             getSupportFragmentManager()
                     .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                     .replace(R.id.main_fragment_container, searchFragment)
                     .commit();
             //isArtistChange();
             return true;
         } else if (itemId == R.id.library_button) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, libraryFragment).commit();
+            getSupportFragmentManager().beginTransaction().setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(R.id.main_fragment_container, libraryFragment).commit();
             Log.d("MainActivity", "Library button clicked");
             //isArtistChange();
             return true;
         } else if (itemId == R.id.upload_song_button) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, uploadSongFragment).commit();
+            getSupportFragmentManager().beginTransaction().setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(R.id.main_fragment_container, uploadSongFragment).addToBackStack(null).commit();
             Log.d("MainActivity", "Upload song clicked");
             //isArtistChange();
             return true;

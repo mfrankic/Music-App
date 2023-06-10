@@ -16,6 +16,15 @@ public class DataSingleton {
 
     private static int numOfFetchedURLs;
     private static String currentUserName, currentUserID, currentUserBio;
+    private static ArrayList<User> allUsers;
+
+    public  ArrayList<User> getAllUsers() {
+        return allUsers;
+    }
+
+    public  void setAllUsers(ArrayList<User> allUsers) {
+        DataSingleton.allUsers = allUsers;
+    }
 
     private DataSingleton() {
 

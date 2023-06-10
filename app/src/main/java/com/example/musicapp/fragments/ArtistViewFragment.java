@@ -36,6 +36,7 @@ public class ArtistViewFragment extends Fragment {
     LinearLayoutManager songsViewManager, albumViewManager;
     ArtistViewSongsAdapter songsViewAdapter;
     ArtistViewAlbumsAdapter albumViewAdapter;
+    Fragment calledFromFragment;
 
     public ArtistViewFragment() {
     }
@@ -59,11 +60,15 @@ public class ArtistViewFragment extends Fragment {
         assert activity != null;
 
         MaterialToolbar toolbar = view.findViewById(R.id.artist_profile_top_bar);
-        toolbar.setNavigationOnClickListener(v -> activity.getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_fragment_container, activity.homeFragment)
-                .commit());
+        toolbar.setNavigationOnClickListener(v -> {
 
+
+            activity.getSupportFragmentManager()
+                .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .replace(R.id.main_fragment_container, calledFromFragment)
+                .commit();
+                });
 
         name = view.findViewById(R.id.artist_profile_artist_name);
         bio = view.findViewById(R.id.artist_profile_artist_bio);
@@ -120,5 +125,13 @@ public class ArtistViewFragment extends Fragment {
     public void setArtistID(String artistID) {
         this.artistID = artistID;
 
+    }
+
+    public Fragment getCalledFromFragment() {
+        return calledFromFragment;
+    }
+
+    public void setCalledFromFragment(Fragment calledFromFragment) {
+        this.calledFromFragment = calledFromFragment;
     }
 }

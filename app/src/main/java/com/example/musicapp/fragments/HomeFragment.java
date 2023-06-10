@@ -79,9 +79,13 @@ public class HomeFragment extends Fragment {
             System.out.println("Notification button clicked");
         });
 
-        AppCompatImageButton recentlyPlayedButton = view.findViewById(R.id.recently_played_button);
-        recentlyPlayedButton.setOnClickListener(v -> {
-            // handle recently played button click
+        AppCompatImageButton socialButton = view.findViewById(R.id.social_button);
+        socialButton.setOnClickListener(v -> {
+            activity.getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_fragment_container, activity.socialFragment)
+                    .addToBackStack("settings")
+                    .commit();
             System.out.println("Recently played button clicked");
         });
 
@@ -89,6 +93,7 @@ public class HomeFragment extends Fragment {
         settingsButton.setOnClickListener(v -> activity.getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.main_fragment_container, activity.settingsFragment)
+                .addToBackStack("settings")
                 .commit());
 
         AppCompatImageButton createPlaylistButton = view.findViewById(R.id.create_playlist_button);

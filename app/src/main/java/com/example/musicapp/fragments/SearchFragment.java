@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.musicapp.entities.Album;
 import com.example.musicapp.entities.DataSingleton;
 import com.example.musicapp.R;
+import com.example.musicapp.entities.Playlist;
 import com.example.musicapp.entities.SearchElement;
 import com.example.musicapp.entities.Song;
 import com.example.musicapp.activities.MainActivity;
@@ -78,6 +79,7 @@ public class SearchFragment extends Fragment {
                 SearchElement searchElement = new SearchElement();
                 searchElement.setSong(song);
                 searchElement.setAlbum(null);
+                searchElement.setPlaylist(null);
                 searchElement.setElementName(song.getSongName());
                 searchElement.setElementType("Song");
 
@@ -91,11 +93,35 @@ public class SearchFragment extends Fragment {
                 Log.d("albumreg", album.toString());
                 SearchElement searchElement = new SearchElement();
                 searchElement.setSong(null);
+                searchElement.setPlaylist(null);
                 searchElement.setAlbum(album);
                 searchElement.setElementName(album.getAlbumName());
                 searchElement.setElementType("Album");
 
                 resultSearchElements.add(searchElement);
+            }
+        }
+
+        for (Playlist playlist: DataSingleton.getDataSingleton().getAllPlaylists()){
+            Matcher matcher = pattern.matcher(playlist.getPlaylistName());
+            if(matcher.find()){
+                Log.d("playlist", "HIT " + playlist.getPlaylistName());
+                SearchElement searchElement = new SearchElement();
+                searchElement.setSong(null);
+                searchElement.setAlbum(null);
+                searchElement.setPlaylist(playlist);
+                searchElement.setElementName(playlist.getPlaylistName());
+                searchElement.setElementType("Playlist");
+
+                if(playlist.isPrivate()){
+                    if(playlist.getCreatorID().equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+                        resultSearchElements.add(searchElement);
+                    }
+                }else {
+                    resultSearchElements.add(searchElement);
+                }
+
+
             }
         }
 
