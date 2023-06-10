@@ -7,6 +7,7 @@ public class Playlist {
     private String creatorID, playlistName, playlistID, creatorName;
     private ArrayList<Song> playlistSongs;
     private ArrayList<String> songsIDs;
+    private boolean isPrivate;
 
     public String getCreatorID() {
         return creatorID;
@@ -64,5 +65,13 @@ public class Playlist {
                 ", playlistSongs=" + playlistSongs +
                 ", songsIDs=" + songsIDs +
                 '}';
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean aPrivate) {
+        isPrivate = aPrivate;
     }
 }

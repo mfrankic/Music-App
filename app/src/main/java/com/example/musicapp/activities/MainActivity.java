@@ -441,6 +441,15 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         playlist.setPlaylistName(document.getString("name"));
                         playlist.setCreatorID(document.getString("creatorID"));
                         playlist.setCreatorName(document.getString("creatorName"));
+
+                        String isPrivateString = String.valueOf(document.get("private"));
+                        Boolean isPrivate = Boolean.valueOf(isPrivateString);
+
+                        if (isPrivate) {
+                            playlist.setPrivate(true);
+                        } else {
+                            playlist.setPrivate(false);
+                        }
                         ArrayList<Song> playlistSongs = new ArrayList<>();
                         ArrayList<String> playlistSongsIDs = (ArrayList<String>) (document.get("songs"));
                         for(String songID: playlistSongsIDs){

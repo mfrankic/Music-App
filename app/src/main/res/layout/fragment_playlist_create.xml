@@ -40,7 +40,7 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Spinners and filter button -->
+        <!-- Playlist name and create button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -58,6 +58,20 @@
                 android:layout_height="wrap_content"
                 android:text="Create playlist"
                 android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <!-- Private checkbox -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/private_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Private playlist" />
 
         </LinearLayout>
 

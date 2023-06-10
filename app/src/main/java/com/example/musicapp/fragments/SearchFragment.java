@@ -113,7 +113,15 @@ public class SearchFragment extends Fragment {
                 searchElement.setElementName(playlist.getPlaylistName());
                 searchElement.setElementType("Playlist");
 
-                resultSearchElements.add(searchElement);
+                if(playlist.isPrivate()){
+                    if(playlist.getCreatorID().equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+                        resultSearchElements.add(searchElement);
+                    }
+                }else {
+                    resultSearchElements.add(searchElement);
+                }
+
+
             }
         }
 
