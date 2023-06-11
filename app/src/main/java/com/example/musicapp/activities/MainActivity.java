@@ -155,35 +155,37 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         // Show/hide upload song, depending on user account type
         uploadButtonItem = bottomNavigationView.findViewById(R.id.upload_song_button);
 
-        DocumentReference userDoc = db.collection("users").document(auth.getUid());
-        userDoc.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document.exists()) {
-                    String isArtistString = String.valueOf(document.get("isArtist"));
-                    isArtist = Boolean.valueOf(isArtistString);
-                    editor.putBoolean("isArtist", isArtist);
-                    editor.apply();
-                    if (!isArtist) {
-                        uploadButtonItem.setVisibility(View.GONE);
+        if (auth.getUid() != null) {
+            DocumentReference userDoc = db.collection("users").document(auth.getUid());
+            userDoc.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        String isArtistString = String.valueOf(document.get("isArtist"));
+                        isArtist = Boolean.valueOf(isArtistString);
+                        editor.putBoolean("isArtist", isArtist);
+                        editor.apply();
+                        if (!isArtist) {
+                            uploadButtonItem.setVisibility(View.GONE);
+                        } else {
+                            uploadButtonItem.setVisibility(View.VISIBLE);
+                        }
+                        Log.d("artcheck", "DocumentSnapshot data: " + isArtist);
                     } else {
-                        uploadButtonItem.setVisibility(View.VISIBLE);
+                        Log.d("artcheck", "No such document");
                     }
-                    Log.d("artcheck", "DocumentSnapshot data: " + isArtist);
                 } else {
-                    Log.d("artcheck", "No such document");
+                    Log.d("artcheck", "get failed with ", task.getException());
                 }
-            } else {
-                Log.d("artcheck", "get failed with ", task.getException());
-            }
-        });
+            });
 
-        storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
+            storage = FirebaseStorage.getInstance();
+            storageRef = storage.getReference();
 
-        getAllBackendData();
-        getCurrentUserData();
-        isArtistChange();
+            getAllBackendData();
+            getCurrentUserData();
+            isArtistChange();
+        }
     }
 
 
