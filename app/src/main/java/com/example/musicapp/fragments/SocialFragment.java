@@ -25,6 +25,7 @@ public class SocialFragment extends Fragment {
     private RecyclerView activityFeedView;
     private ArrayList<UsersActivities> activityFeed;
     private LinearLayoutManager activityFeedManager;
+    public Fragment calledFromFragment;
     //private ActivityFeedAdapter activityFeedAdapter;
 
     public SocialFragment(){}
@@ -51,7 +52,7 @@ public class SocialFragment extends Fragment {
         toolbar.setNavigationOnClickListener(v -> activity.getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                .replace(R.id.main_fragment_container, activity.homeFragment)
+                .replace(R.id.main_fragment_container, calledFromFragment)
                 .commit());
 
         // Show all users button
@@ -79,5 +80,13 @@ public class SocialFragment extends Fragment {
 
     private void getActivityFeed() {
         //activityFeed = DataSingleton.getDataSingleton().getAllActivities();
+    }
+
+    public Fragment getCalledFromFragment() {
+        return calledFromFragment;
+    }
+
+    public void setCalledFromFragment(Fragment calledFromFragment) {
+        this.calledFromFragment = calledFromFragment;
     }
 }

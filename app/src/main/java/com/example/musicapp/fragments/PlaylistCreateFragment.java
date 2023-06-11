@@ -40,6 +40,8 @@ public class PlaylistCreateFragment extends Fragment {
     private EditText playlistName;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CheckBox privateCheckbox;
+
+    public Fragment calledFromFragment;
     public PlaylistCreateFragment() {
         // Required empty public constructor
     }
@@ -65,7 +67,7 @@ public class PlaylistCreateFragment extends Fragment {
         MaterialToolbar toolbar = view.findViewById(R.id.fragment_create_playlist_top_bar);
         toolbar.setNavigationOnClickListener(v -> activity.getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.main_fragment_container, activity.homeFragment)
+                .replace(R.id.main_fragment_container, calledFromFragment)
                 .commit());
 
         privateCheckbox = view.findViewById(R.id.private_checkbox);
@@ -117,5 +119,13 @@ public class PlaylistCreateFragment extends Fragment {
 
         DataSingleton.getDataSingleton().playlistCreateSongs = new ArrayList<>();
 
+    }
+
+    public Fragment getCalledFromFragment() {
+        return calledFromFragment;
+    }
+
+    public void setCalledFromFragment(Fragment calledFromFragment) {
+        this.calledFromFragment = calledFromFragment;
     }
 }

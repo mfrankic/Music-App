@@ -70,6 +70,15 @@
                 android:textSize="18sp"
                 android:layout_gravity="center"></TextView>
 
+            <!-- Follow Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/artist_follow_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Follow"
+                android:textSize="16sp"
+                android:layout_gravity="center"/>
+
             <!-- First RecyclerView with title "Songs" -->
             <TextView
                 android:layout_width="match_parent"
