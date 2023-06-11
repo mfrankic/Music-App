@@ -1,7 +1,6 @@
 package com.example.musicapp.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,8 +48,6 @@ public class HomeFragment extends Fragment {
         if (getArguments() != null) {
             allSongs = getArguments().getParcelableArrayList("allSongs");
         }
-
-        Log.d("HomeFragment", "onViewCreated: " + allSongs.toString());
 
         MainActivity activity = (MainActivity) getActivity();
         assert activity != null;

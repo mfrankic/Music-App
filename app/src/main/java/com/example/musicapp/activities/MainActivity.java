@@ -3,7 +3,6 @@ package com.example.musicapp.activities;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -34,10 +33,6 @@ import com.example.musicapp.fragments.SettingsFragment;
 import com.example.musicapp.fragments.SocialFragment;
 import com.example.musicapp.fragments.UploadSongFragment;
 import com.example.musicapp.fragments.UserViewFragment;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -46,7 +41,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -219,39 +213,36 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         // Users collection reference
         CollectionReference usersCollRef = db.collection("users");
 
-        usersCollRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    ArrayList<User> allUsers = new ArrayList<>();
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Log.d("allSongs", document.getId() + " => " + document.getData());
-                        usersSongCollRef.put(document.getId().toString(), document.getString("name"));
-                        usersIDAndBio.put(document.getId().toString(), document.getString("bio"));
+        usersCollRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                ArrayList<User> allUsers = new ArrayList<>();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    Log.d("allSongs", document.getId() + " => " + document.getData());
+                    usersSongCollRef.put(document.getId().toString(), document.getString("name"));
+                    usersIDAndBio.put(document.getId().toString(), document.getString("bio"));
 
-                        User user = new User();
-                        user.setUserID(document.getId());
-                        user.setUserBio(document.getString("bio"));
-                        user.setUserName(document.getString("name"));
+                    User user = new User();
+                    user.setUserID(document.getId());
+                    user.setUserBio(document.getString("bio"));
+                    user.setUserName(document.getString("name"));
 
 
-                        String isArtistString = String.valueOf(document.get("isArtist"));
-                        isArtist = Boolean.valueOf(isArtistString);
-                        if (isArtist) {
-                            user.setArtist(true);
-                        } else {
-                            user.setArtist(false);
-                        }
-
-                        allUsers.add(user);
-
+                    String isArtistString = String.valueOf(document.get("isArtist"));
+                    isArtist = Boolean.valueOf(isArtistString);
+                    if (isArtist) {
+                        user.setArtist(true);
+                    } else {
+                        user.setArtist(false);
                     }
-                    DataSingleton.getDataSingleton().setAllUsers(allUsers);
-                    userIDsFetchfinished = true;
-                    getSongsDocuments();
-                } else {
-                    Log.d("allSongs", "Error getting documents: ", task.getException());
+
+                    allUsers.add(user);
+
                 }
+                DataSingleton.getDataSingleton().setAllUsers(allUsers);
+                userIDsFetchfinished = true;
+                getSongsDocuments();
+            } else {
+                Log.d("allSongs", "Error getting documents: ", task.getException());
             }
         });
     }
@@ -266,58 +257,47 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             Log.d("allSongs", "looking for user: " + entry.getKey());
 
 
-            userSongColl.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Log.d("allSongs", document.getId() + " => " + document.getData());
+            userSongColl.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Log.d("allSongs", document.getId() + " => " + document.getData());
 
-                            Song song = new Song();
-                            song.setArtistBio(usersIDAndBio.get(entry.getKey()));
-                            song.setAlbumUUDI(document.getString("album"));
-                            song.setGenre(document.getString("genre"));
-                            song.setSongName(document.getString("songName"));
-                            song.setSongFileUUID(document.getString("songUUID"));
-                            song.setArtistName(entry.getValue());
-                            song.setArtistID(entry.getKey());
-                            song.setNumberOfLikes(document.getString("numberOfLikes"));
-                            song.setNumberOfListens(Integer.valueOf(document.getString("numberOfListens")));
-                            //song.setSongPath(document.get);
-                            Log.d("pesma", song.toString());
+                        Song song = new Song();
+                        song.setArtistBio(usersIDAndBio.get(entry.getKey()));
+                        song.setAlbumUUDI(document.getString("album"));
+                        song.setGenre(document.getString("genre"));
+                        song.setSongName(document.getString("songName"));
+                        song.setSongFileUUID(document.getString("songUUID"));
+                        song.setArtistName(entry.getValue());
+                        song.setArtistID(entry.getKey());
+                        song.setNumberOfLikes(document.getString("numberOfLikes"));
+                        song.setNumberOfListens(Integer.valueOf(document.getString("numberOfListens")));
+                        //song.setSongPath(document.get);
+                        Log.d("pesma", song.toString());
 
-                            allSongs.add(song);
-                        }
-
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelableArrayList("allSongs", allSongs);
-
-                        homeFragment.setArguments(bundle);
-                        // refresh fragment
-                        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                        ft.detach(homeFragment).attach(homeFragment).commit();
-                    } else {
-                        Log.d("allSongs", "Error getting documents: ", task.getException());
+                        allSongs.add(song);
                     }
+                } else {
+                    Log.d("allSongs", "Error getting documents: ", task.getException());
+                }
 
-                    // Finally pass songs to adapter to show them in recycle view
-                    //setAllSongsAdapter(allSongs);
-                    /*
-                    getAlbumData();
+                // Finally pass songs to adapter to show them in recycle view
+                //setAllSongsAdapter(allSongs);
+                /*
+                getAlbumData();
+                getAllArtists();
+                getSongsURL();
+                */
+                //getAlbumData();
+
+                numOfSongsFetched += 1;
+
+                Log.d("allSongs", String.valueOf(numOfSongsFetched) + " " + String.valueOf(usersSongCollRef.size()));
+                if (numOfSongsFetched == usersSongCollRef.size()) {
                     getAllArtists();
+                    updateSongsWithAlbumData();
                     getSongsURL();
-                    */
-                    //getAlbumData();
 
-                    numOfSongsFetched += 1;
-
-                    Log.d("allSongs", String.valueOf(numOfSongsFetched) + " " + String.valueOf(usersSongCollRef.size()));
-                    if (numOfSongsFetched == usersSongCollRef.size()) {
-                        getAllArtists();
-                        updateSongsWithAlbumData();
-                        getSongsURL();
-
-                    }
                 }
             });
 
@@ -328,37 +308,43 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
     private void getAlbumData() {
         CollectionReference albums = db.collection("albums/");
-        albums.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Object timestampObject = document.get("releaseDate");
-                        com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) timestampObject;
-                        long timestampMillis = timestamp.toDate().getTime();
-                        Timestamp releaseDate = new Timestamp(timestamp.toDate().getTime());
-                        // Use the timestampMillis as needed
-                        Log.d("vreme", String.valueOf(releaseDate));
+        albums.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    Object timestampObject = document.get("releaseDate");
+                    com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) timestampObject;
+                    long timestampMillis = timestamp.toDate().getTime();
+                    Timestamp releaseDate = new Timestamp(timestamp.toDate().getTime());
+                    // Use the timestampMillis as needed
+                    Log.d("vreme", String.valueOf(releaseDate));
 
-                        Album album = new Album();
-                        album.setAlbumName(document.get("albumName").toString());
-                        album.setReleaseDate(releaseDate);
-                        album.setAlbumID(document.getId().toString());
-                        album.setArtistID(document.getString("artistID"));
-                        allAlbums.add(album);
+                    Album album = new Album();
+                    album.setAlbumName(document.get("albumName").toString());
+                    album.setReleaseDate(releaseDate);
+                    album.setAlbumID(document.getId().toString());
+                    album.setArtistID(document.getString("artistID"));
+                    allAlbums.add(album);
 
-                    }
-                    Log.d("allAlbums", allAlbums.toString());
-
-                } else {
-                    Log.d("allSongs", "Error getting documents: ", task.getException());
                 }
-                //updateSongsWithAlbumData();
-                //DataSingleton.getDataSingleton().setAllSongs(allSongs);
+                Log.d("allAlbums", allAlbums.toString());
 
-                // ovo se zove getAllReleaseYears();
-                DataSingleton.getDataSingleton().setAllAlbums(allAlbums);
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("allSongs", allSongs);
+                bundle.putParcelableArrayList("allAlbums", allAlbums);
+
+                homeFragment.setArguments(bundle);
+                // refresh fragment
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                ft.detach(homeFragment).attach(homeFragment).commit();
+
+            } else {
+                Log.d("allSongs", "Error getting documents: ", task.getException());
             }
+            //updateSongsWithAlbumData();
+            //DataSingleton.getDataSingleton().setAllSongs(allSongs);
+
+            // ovo se zove getAllReleaseYears();
+            DataSingleton.getDataSingleton().setAllAlbums(allAlbums);
         });
     }
 
@@ -397,39 +383,32 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             try {
                 StorageReference songRef = storageRef.child("/" + "songs/" + song.getSongFileUUID() + ".mp3");
 
-                songRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri downloadUrl) {
+                songRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
 
-                        //Log.d("URLgetzika", song.getSongPath());
-                        if (song.getSongPath() == null) {
-                            song.setSongPath(downloadUrl.toString());
-
-                        }
-                        Log.d("URLgetzika", String.valueOf(song.getSongPath()));
-                        Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
-                        numOfURLsFetched += 1;
-                        if (numOfURLsFetched == allSongs.size()) {
-                            DataSingleton.getDataSingleton().setAllSongs(allSongs);
-                            getPlaylists();
-                            Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
-                        }
-                        Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
+                    //Log.d("URLgetzika", song.getSongPath());
+                    if (song.getSongPath() == null) {
+                        song.setSongPath(downloadUrl.toString());
 
                     }
-
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        numOfURLsFetched += 1;
-                        if (numOfURLsFetched == allSongs.size()) {
-                            DataSingleton.getDataSingleton().setAllSongs(allSongs);
-                            getPlaylists();
-                            Toast.makeText(MainActivity.this, "Data load finished", Toast.LENGTH_SHORT).show();
-                            libraryFragment.dataUpdate();
-                        }
-                        e.printStackTrace();
+                    Log.d("URLgetzika", String.valueOf(song.getSongPath()));
+                    Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
+                    numOfURLsFetched += 1;
+                    if (numOfURLsFetched == allSongs.size()) {
+                        DataSingleton.getDataSingleton().setAllSongs(allSongs);
+                        getPlaylists();
+                        Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
                     }
+                    Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
+
+                }).addOnFailureListener(e -> {
+                    numOfURLsFetched += 1;
+                    if (numOfURLsFetched == allSongs.size()) {
+                        DataSingleton.getDataSingleton().setAllSongs(allSongs);
+                        getPlaylists();
+                        Toast.makeText(MainActivity.this, "Data load finished", Toast.LENGTH_SHORT).show();
+                        libraryFragment.dataUpdate();
+                    }
+                    e.printStackTrace();
                 });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -534,7 +513,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                     .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                     .replace(R.id.main_fragment_container, homeFragment);
 
-            if (allSongs != null && allSongs.size() > 0) {
+            if (allSongs != null && allSongs.size() > 0 && allAlbums != null && allAlbums.size() > 0) {
 
                 Log.d("MainActivity", allSongs.toString());
                 fragmentTransaction.commit();

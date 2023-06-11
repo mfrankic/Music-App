@@ -210,8 +210,8 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, (String) mediaItems.get(mCurrentSongIndex).getDescription().getTitle())
                             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, (String) mediaItems.get(mCurrentSongIndex).getDescription().getSubtitle());
                     mediaSession.setMetadata(metadataBuilder.build());
-                    mediaPlayer.setOnCompletionListener(mp1 -> skipToNext());
                 });
+                mediaPlayer.setOnCompletionListener(mp -> skipToNext());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -336,8 +336,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             });
 
         } else if (pbStateCompat.getState() == PlaybackStateCompat.STATE_PAUSED || pbStateCompat.getState() == PlaybackStateCompat.STATE_NONE) {
-            Log.d("MusicPlayerService", "play:");
-            mediaPlayer.setOnPreparedListener(MediaPlayer::start);
+            mediaPlayer.start();
             updatePlaybackState(PlaybackStateCompat.ACTION_PLAY);
         }
     }
