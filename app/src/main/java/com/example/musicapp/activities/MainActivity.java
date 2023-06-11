@@ -33,6 +33,7 @@ import com.example.musicapp.fragments.SettingsFragment;
 import com.example.musicapp.fragments.SocialFragment;
 import com.example.musicapp.fragments.UploadSongFragment;
 import com.example.musicapp.fragments.UserViewFragment;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -104,7 +105,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         findViewById(R.id.artist_name).setSelected(true);
 
         // open music player when clicked on music player bar
-        findViewById(R.id.music_player_bar).setOnClickListener(v -> {
+        MaterialCardView musicPlayerBar = findViewById(R.id.music_player_bar);
+        musicPlayerBar.setVisibility(View.GONE);
+        musicPlayerBar.setOnClickListener(v -> {
             //DataSingleton.getDataSingleton().setAllSongs(libraryFragment.getAllSongsGetter());
             Intent intent = new Intent(this, MusicPlayerActivity.class);
             ActivityOptions options = ActivityOptions.makeCustomAnimation(this, R.anim.slide_in_up, R.anim.fade_out);

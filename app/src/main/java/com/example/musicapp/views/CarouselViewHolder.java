@@ -20,6 +20,7 @@ import com.example.musicapp.activities.MainActivity;
 import com.example.musicapp.entities.Song;
 import com.example.musicapp.entities.TempSong;
 import com.example.musicapp.services.MusicPlayerService;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,8 @@ public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.
     @Override
     public void onClick(View view) {
         // send song to MusicPlayerService
+        MaterialCardView musicPlayerBar = activity.findViewById(R.id.music_player_bar);
+        musicPlayerBar.setVisibility(View.VISIBLE);
         initializeData();
         mediaBrowser.connect();
     }
