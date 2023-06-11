@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.musicapp.R;
 import com.example.musicapp.activities.MainActivity;
 import com.example.musicapp.entities.Song;
-import com.example.musicapp.entities.TempSong;
 import com.example.musicapp.services.MusicPlayerService;
 import com.google.android.material.card.MaterialCardView;
 
@@ -89,21 +88,14 @@ public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.
             };
 
     private void initializeData() {
-        ArrayList<Integer> songList = new ArrayList<>();
-        TempSong firstSong = new TempSong(1, "Danza Kuduro", "Don Omar", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
-        TempSong secondSong = new TempSong(2, "In Da Club", "50 Cent", "Get Rich Or Die Tryin'", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2Fde4d5dcf-6d7c-4b60-87bb-6a0f044d1923.mp3?alt=media&token=0e420a8f-92c2-4f1a-8aba-0ae79de098d5");
-        songList.add(firstSong.getSongId());
-        songList.add(secondSong.getSongId());
-
-        ArrayList<String> songPaths = new ArrayList<>();
-        songPaths.add(firstSong.getSongPath());
-        songPaths.add(secondSong.getSongPath());
+        ArrayList<Song> songList = new ArrayList<>();
+        songList.add(song);
 
         Intent startServiceIntent = new Intent(activity, MusicPlayerService.class);
-        startServiceIntent.putExtra("songList", songPaths);
+        startServiceIntent.putExtra("songList", songList);
 
         Bundle songBundle = new Bundle();
-        songBundle.putIntegerArrayList("songList", songList);
+        songBundle.putParcelableArrayList("songList", songList);
         mediaBrowser.subscribe("media", songBundle, new MediaBrowserCompat.SubscriptionCallback() {
             @Override
             public void onChildrenLoaded(@NonNull String parentId, @NonNull List<MediaBrowserCompat.MediaItem> children) {

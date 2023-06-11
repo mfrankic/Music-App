@@ -30,7 +30,7 @@ import androidx.media.session.MediaButtonReceiver;
 
 import com.example.musicapp.R;
 import com.example.musicapp.activities.MainActivity;
-import com.example.musicapp.entities.TempSong;
+import com.example.musicapp.entities.Song;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private static final String NOTIFICATION_CHANNEL_ID = "music_player_channel";
     private static final int REQUEST_CODE = 100;
     private MediaPlayer mediaPlayer;
-    private ArrayList<String> songList; // list of song file URLs or paths
+    private ArrayList<Song> songList; // list of song file URLs or paths
     private int mCurrentSongIndex; // index of the currently playing song
     private MediaSessionCompat mediaSession;
     private MediaMetadataCompat.Builder metadataBuilder;
@@ -188,7 +188,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             return START_NOT_STICKY;
         }
 
-        songList = intent.getStringArrayListExtra("songList");
+        songList = intent.getParcelableArrayListExtra("songList");
         mCurrentSongIndex = intent.getIntExtra("songIndex", 0);
 
         mediaController = new MediaControllerCompat(MusicPlayerService.this, mediaSession.getSessionToken());
@@ -202,7 +202,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                             .build()
             );
             try {
-                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
+                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex).getSongPath()));
                 mediaPlayer.prepareAsync();
                 Log.d("MusicPlayerService", "onStartCommand: " + mediaItems);
                 mediaPlayer.setOnPreparedListener(mp -> {
@@ -253,35 +253,27 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
 
     @Override
     public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result, @NonNull Bundle options) {
-        ArrayList<Integer> songIdsList = options.getIntegerArrayList("songList");
+        ArrayList<Song> songListIn = options.getParcelableArrayList("songList");
         // If the media item information is ready, you can call sendResult() immediately.
         if (mediaItemsAreReady) {
             result.sendResult(mediaItems);
         } else {
             result.detach();
             // Load media items and call sendResult() when ready.
-            loadMediaItems(result, songIdsList);
+            loadMediaItems(result, songListIn);
         }
     }
 
     // Dummy method for media items loading. You should implement actual logic.
-    private void loadMediaItems(Result<List<MediaBrowserCompat.MediaItem>> result, ArrayList<Integer> songIdsList) {
+    private void loadMediaItems(Result<List<MediaBrowserCompat.MediaItem>> result, ArrayList<Song> songListIn) {
         // Check if the song list is available and not empty
-        if (songIdsList != null && !songIdsList.isEmpty()) {
+        if (songListIn != null && !songListIn.isEmpty()) {
             // Initialize the media items list
             mediaItems = new ArrayList<>();
 
-            // TODO: get songs from firebase or change sending items from activity
-            TempSong firstSong = new TempSong(songIdsList.get(0), "Danza Kuduro", "Don Omar", "Don Omar Presents: Meet The Orphans", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2F0ee95f21-6bd9-41aa-8bdd-50ee26c216f4.mp3?alt=media&token=412ea96d-008b-4b6b-a19e-db57d1d0fb24");
-            TempSong secondSong = new TempSong(songIdsList.get(1), "In Da Club", "50 Cent", "Get Rich or Die Tryin'", "https://firebasestorage.googleapis.com/v0/b/music-app-7dc1d.appspot.com/o/songs%2Fde4d5dcf-6d7c-4b60-87bb-6a0f044d1923.mp3?alt=media&token=0e420a8f-92c2-4f1a-8aba-0ae79de098d5");
-
-            ArrayList<TempSong> newList = new ArrayList<>();
-            newList.add(firstSong);
-            newList.add(secondSong);
-
-            for (TempSong song : newList) {
+            for (Song song : songListIn) {
                 MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
-                        .setMediaId(String.valueOf(song.getSongId()))
+                        .setMediaId(String.valueOf(song.getSongFileUUID()))
                         .setTitle(song.getSongName())
                         .setSubtitle(song.getArtistName())
                         .setDescription(song.getAlbumName())
@@ -316,7 +308,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                             .build()
             );
             try {
-                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
+                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex).getSongPath()));
                 mediaPlayer.prepareAsync();
                 mediaPlayer.setOnPreparedListener(mp -> {
                     metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration())
