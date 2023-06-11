@@ -106,7 +106,7 @@ public class HomeFragment extends Fragment {
         List<CarouselItem> items = new ArrayList<>();
 
         for (Song song : allSongs) {
-            items.add(new CarouselItem(R.drawable.playlist_image, song.getSongName()));
+            items.add(new CarouselItem(R.drawable.playlist_image, song));
         }
 
 //        items.add(new CarouselItem(R.drawable.playlist_image, "Album 1"));
