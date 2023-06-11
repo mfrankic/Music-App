@@ -192,30 +192,30 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
         mCurrentSongIndex = intent.getIntExtra("songIndex", 0);
 
         mediaController = new MediaControllerCompat(MusicPlayerService.this, mediaSession.getSessionToken());
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setAudioAttributes(
-                new AudioAttributes.Builder()
-                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
-                        .build()
-        );
-        try {
-            mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
-            mediaPlayer.prepareAsync();
-            mediaPlayer.setOnPreparedListener(mp -> {
-                metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration())
-                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, (String) mediaItems.get(mCurrentSongIndex).getDescription().getTitle())
-                        .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, (String) mediaItems.get(mCurrentSongIndex).getDescription().getSubtitle());
-                mediaSession.setMetadata(metadataBuilder.build());
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        mediaPlayer.setOnCompletionListener(mp -> {
-            // handle completion of a track
-            skipToNext();
-        });
+        if (mediaItemsAreReady) {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioAttributes(
+                    new AudioAttributes.Builder()
+                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                            .build()
+            );
+            try {
+                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex)));
+                mediaPlayer.prepareAsync();
+                Log.d("MusicPlayerService", "onStartCommand: " + mediaItems);
+                mediaPlayer.setOnPreparedListener(mp -> {
+                    metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration())
+                            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, (String) mediaItems.get(mCurrentSongIndex).getDescription().getTitle())
+                            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, (String) mediaItems.get(mCurrentSongIndex).getDescription().getSubtitle());
+                    mediaSession.setMetadata(metadataBuilder.build());
+                    mediaPlayer.setOnCompletionListener(mp1 -> skipToNext());
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -336,7 +336,8 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             });
 
         } else if (pbStateCompat.getState() == PlaybackStateCompat.STATE_PAUSED || pbStateCompat.getState() == PlaybackStateCompat.STATE_NONE) {
-            mediaPlayer.start();
+            Log.d("MusicPlayerService", "play:");
+            mediaPlayer.setOnPreparedListener(MediaPlayer::start);
             updatePlaybackState(PlaybackStateCompat.ACTION_PLAY);
         }
     }

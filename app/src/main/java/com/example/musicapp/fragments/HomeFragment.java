@@ -125,7 +125,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager recommendedLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         recommendedRecyclerView.setLayoutManager(recommendedLayoutManager);
 
-        CarouselAdapter recommendedAdapter = new CarouselAdapter(items);
+        CarouselAdapter recommendedAdapter = new CarouselAdapter(activity, items);
         recommendedRecyclerView.setAdapter(recommendedAdapter);
 
 
@@ -133,7 +133,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager recentlyPlayedLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         recentlyPlayedRecyclerView.setLayoutManager(recentlyPlayedLayoutManager);
 
-        CarouselAdapter recentlyPlayedAdapter = new CarouselAdapter(items);
+        CarouselAdapter recentlyPlayedAdapter = new CarouselAdapter(activity, items);
         recentlyPlayedRecyclerView.setAdapter(recentlyPlayedAdapter);
 
 
@@ -141,7 +141,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager popularLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         popularRecyclerView.setLayoutManager(popularLayoutManager);
 
-        CarouselAdapter popularAdapter = new CarouselAdapter(items);
+        CarouselAdapter popularAdapter = new CarouselAdapter(activity, items);
         popularRecyclerView.setAdapter(popularAdapter);
 
 
@@ -149,7 +149,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager featuredLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         featuredRecyclerView.setLayoutManager(featuredLayoutManager);
 
-        CarouselAdapter featuredAdapter = new CarouselAdapter(items);
+        CarouselAdapter featuredAdapter = new CarouselAdapter(activity, items);
         featuredRecyclerView.setAdapter(featuredAdapter);
     }
 }
