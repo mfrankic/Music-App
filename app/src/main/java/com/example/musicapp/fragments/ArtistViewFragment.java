@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicapp.adapters.UserViewPlaylistAdapter;
 import com.example.musicapp.entities.Album;
 import com.example.musicapp.entities.DataSingleton;
 import com.example.musicapp.R;
@@ -20,6 +21,7 @@ import com.example.musicapp.entities.Song;
 import com.example.musicapp.activities.MainActivity;
 import com.example.musicapp.adapters.ArtistViewAlbumsAdapter;
 import com.example.musicapp.adapters.ArtistViewSongsAdapter;
+import com.example.musicapp.entities.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -77,7 +79,7 @@ public class ArtistViewFragment extends Fragment {
 
             activity.getSupportFragmentManager()
                 .beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .setCustomAnimations(android.R.anim.slide_out_right, android.R.anim.fade_out)
                 .replace(R.id.main_fragment_container, calledFromFragment)
                 .commit();
                 });
@@ -173,6 +175,18 @@ public class ArtistViewFragment extends Fragment {
 
     public void setArtistID(String artistID) {
         this.artistID = artistID;
+
+        if(name != null){
+            getNameAndBio();
+            getSongsAndAlbums();
+            name.setText(artistName);
+            bio.setText(artistBio);
+            albumViewAdapter = new ArtistViewAlbumsAdapter(getContext(), albums);
+            songsViewAdapter = new ArtistViewSongsAdapter(getContext(), songs);
+
+        }else {
+            Log.d("artistAllusers", "name == null");
+        }
 
     }
 

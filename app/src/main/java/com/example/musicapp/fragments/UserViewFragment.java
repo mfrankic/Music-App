@@ -31,7 +31,7 @@ public class UserViewFragment extends Fragment {
     RecyclerView playlistsView;
     LinearLayoutManager playlistManager;
     UserViewPlaylistAdapter playlistAdapter;
-
+    public User user;
     public UserViewFragment(){}
 
     @Override
@@ -64,8 +64,8 @@ public class UserViewFragment extends Fragment {
 
         name = view.findViewById(R.id.user_profile_user_name);
         bio = view.findViewById(R.id.user_profile_user_bio);
-        name.setText(DataSingleton.getDataSingleton().getCurrentUserName());
-        bio.setText(DataSingleton.getDataSingleton().getCurrentUserBio());
+        name.setText(user.getUserName());
+        bio.setText(user.getUserBio());
 
 
         getPlaylists();
@@ -84,6 +84,19 @@ public class UserViewFragment extends Fragment {
     }
 
     private  void  getPlaylists() {
-        playlists = DataSingleton.getDataSingleton().getAllPlaylists();
+        playlists = user.getPlaylists();
+    }
+
+    public void setUser(String userID){
+        ArrayList<User> allUsers = DataSingleton.getDataSingleton().getAllUsers();
+        for(User user: allUsers){
+            if (user.getUserID().equals(userID)){
+                this.user = user;
+                break;
+            }
+        }
+        playlistAdapter = new UserViewPlaylistAdapter(getContext(), user.getPlaylists());
+        name.setText(user.getUserName());
+        bio.setText(user.getUserBio());
     }
 }

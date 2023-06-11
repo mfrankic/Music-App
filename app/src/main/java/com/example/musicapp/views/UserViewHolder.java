@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.musicapp.R;
 import com.example.musicapp.activities.MainActivity;
 import com.example.musicapp.entities.User;
+import com.example.musicapp.fragments.ArtistViewFragment;
 
 public class UserViewHolder extends RecyclerView.ViewHolder {
     public TextView userNameTextView;
@@ -29,9 +30,10 @@ public class UserViewHolder extends RecyclerView.ViewHolder {
 
                 if (user.isArtist()) {
                     targetFragment = activity.artistViewFragment;
-                    activity.artistViewFragment.setCalledFromFragment(activity.allUsersViewFragment);
                     activity.artistViewFragment.setArtistID(user.getUserID());
+                    activity.artistViewFragment.setCalledFromFragment(activity.allUsersViewFragment);
                 } else {
+                    activity.userViewFragment.user = user;
                     targetFragment = activity.userViewFragment;
 
                 }

@@ -491,7 +491,8 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 }
 
                 DataSingleton.getDataSingleton().setAllPlaylists(allPlaylists);
-                Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
+                updateUsersWithPlaylists();
+
                 Log.d("playlistLoad", DataSingleton.getDataSingleton().getAllPlaylists().toString());
             }
 
@@ -501,6 +502,23 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         });
 
+    }
+
+    public void updateUsersWithPlaylists(){
+        ArrayList<User> allUsers = DataSingleton.getDataSingleton().getAllUsers();
+        ArrayList<Playlist> usersPlaylists = new ArrayList<>();
+        for(User user: allUsers){
+            for(Playlist playlist: DataSingleton.getDataSingleton().getAllPlaylists()){
+                if(playlist.getCreatorID().equals(user.getUserID())){
+                    usersPlaylists.add(playlist);
+                }
+            }
+            user.setPlaylists(usersPlaylists);
+            usersPlaylists = new ArrayList<>();
+        }
+        DataSingleton.getDataSingleton().setAllUsers(allUsers);
+
+        Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
     }
 
     public void getAllBackendData() {
