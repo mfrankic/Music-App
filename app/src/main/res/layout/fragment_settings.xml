@@ -93,7 +93,7 @@
             </LinearLayout>
 
             <!-- Switch theme button -->
-            <LinearLayout
+            <!--<LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -106,7 +106,7 @@
                     android:textSize="18sp"
                     app:switchPadding="14dp" />
 
-            </LinearLayout>
+            </LinearLayout>-->
 
 
             <com.google.android.material.switchmaterial.SwitchMaterial

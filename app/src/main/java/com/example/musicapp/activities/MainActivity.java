@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = sharedPreferences.edit();
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPrefListener);
-        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode_enabled", false);
+        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode_enabled", true);
         if (darkModeEnabled) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         } else {
@@ -438,7 +438,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         }
     }
 
-    public void getPlaylists(){
+    public void getPlaylists() {
         ArrayList<Playlist> allPlaylists = new ArrayList<>();
 
         CollectionReference playlistColl = db.collection("playlist");
@@ -461,9 +461,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                     }
                     ArrayList<Song> playlistSongs = new ArrayList<>();
                     ArrayList<String> playlistSongsIDs = (ArrayList<String>) (document.get("songs"));
-                    for(String songID: playlistSongsIDs){
-                        for(Song song: allSongs){
-                            if(songID.equals(song.getSongFileUUID())){
+                    for (String songID : playlistSongsIDs) {
+                        for (Song song : allSongs) {
+                            if (songID.equals(song.getSongFileUUID())) {
                                 playlistSongs.add(song);
                             }
                         }
@@ -477,9 +477,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 DataSingleton.getDataSingleton().setAllPlaylists(allPlaylists);
                 Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
                 Log.d("playlistLoad", DataSingleton.getDataSingleton().getAllPlaylists().toString());
-            }
-
-            else {
+            } else {
                 //Log.d(TAG, "Error getting documents: ", task.getException());
             }
 
@@ -533,7 +531,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         if (itemId == R.id.home_button) {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager()
                     .beginTransaction()
-                     .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                     .replace(R.id.main_fragment_container, homeFragment);
 
             if (allSongs != null && allSongs.size() > 0) {

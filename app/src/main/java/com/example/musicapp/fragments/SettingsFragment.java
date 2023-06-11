@@ -60,16 +60,16 @@ public class SettingsFragment extends Fragment {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        SwitchMaterial themeSwitch = view.findViewById(R.id.switch_theme);
-        themeSwitch.setChecked(sharedPreferences.getBoolean("dark_mode_enabled", false));
-
-        themeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            //SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean("dark_mode_enabled", isChecked);
-            editor.apply();
-            activity.onSaveInstanceState(new Bundle());
-            activity.recreate();
-        });
+//        SwitchMaterial themeSwitch = view.findViewById(R.id.switch_theme);
+//        themeSwitch.setChecked(sharedPreferences.getBoolean("dark_mode_enabled", true));
+//
+//        themeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//            //SharedPreferences.Editor editor = sharedPreferences.edit();
+//            editor.putBoolean("dark_mode_enabled", isChecked);
+//            editor.apply();
+//            activity.onSaveInstanceState(new Bundle());
+//            activity.recreate();
+//        });
 
 
         view.findViewById(R.id.logout_button).setOnClickListener(v -> {
