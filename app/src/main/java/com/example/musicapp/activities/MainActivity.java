@@ -24,8 +24,10 @@ import com.example.musicapp.entities.DataSingleton;
 import com.example.musicapp.entities.Playlist;
 import com.example.musicapp.entities.Song;
 import com.example.musicapp.entities.User;
+import com.example.musicapp.entities.UserActivityEvent;
 import com.example.musicapp.fragments.AllUsersViewFragment;
 import com.example.musicapp.fragments.ArtistViewFragment;
+import com.example.musicapp.fragments.EditSongFragment;
 import com.example.musicapp.fragments.HomeFragment;
 import com.example.musicapp.fragments.LibraryFragment;
 import com.example.musicapp.fragments.PlaylistCreateFragment;
@@ -62,12 +64,13 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     protected final UploadSongFragment uploadSongFragment = new UploadSongFragment();
     public final SearchFragment searchFragment = new SearchFragment();
     public final SettingsFragment settingsFragment = new SettingsFragment();
-    public final LibraryFragment libraryFragment = new LibraryFragment();
+    public  LibraryFragment libraryFragment = new LibraryFragment();
     public ArtistViewFragment artistViewFragment = new ArtistViewFragment();
     public PlaylistCreateFragment playlistCreateFragment = new PlaylistCreateFragment();
     public SocialFragment socialFragment = new SocialFragment();
     public AllUsersViewFragment allUsersViewFragment = new AllUsersViewFragment();
     public UserViewFragment userViewFragment = new UserViewFragment();
+    public EditSongFragment editSongFragment = new EditSongFragment();
 
     private View uploadButtonItem;
 
@@ -192,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     }
 
 
-    private void getCurrentUserData() {
+    public void getCurrentUserData() {
 
         FirebaseUser currentUser = auth.getCurrentUser();
         DataSingleton.getDataSingleton().setCurrentUserID(currentUser.getUid());
@@ -207,7 +210,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         Log.d("debugfollow", "followexists");
                         ArrayList<String> followingIDs = new ArrayList<>();
                         followingIDs = (ArrayList<String>) (document.get("following"));
+
                         DataSingleton.getDataSingleton().setCurrentUserFollowingIDs(followingIDs);
+                        getCurrentUserEvents();
                     }
                     else{
                         Log.d("debugfollow", "follow not exists");
@@ -223,6 +228,28 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         });
     }
 
+    private void getCurrentUserEvents(){
+        CollectionReference events = db.collection("events");
+        events.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                ArrayList<UserActivityEvent> allEvents = new ArrayList<>();
+                ArrayList<String> followingIDs = DataSingleton.getDataSingleton().getCurrentUserFollowingIDs();
+                for (QueryDocumentSnapshot document : task.getResult()){
+                    if(followingIDs.contains((String)document.get("creator"))){
+                        UserActivityEvent event = new UserActivityEvent();
+                        event.setEventCreator(DataSingleton.getDataSingleton().getUserByID((String)document.get("creator")));
+                        event.setEventDescription((String)document.get("description"));
+                        event.setEventType((String)document.get("type"));
+                        Log.d("socaialfrag", event.toString());
+                        allEvents.add(event);
+                    }
+                }
+                DataSingleton.getDataSingleton().setAllEvents(allEvents);
+            } else {
+                Log.d("socaialfrag", "get failed with ", task.getException());
+            }
+        });
+    }
     private void getUsersIDs() {
         usersSongCollRef = new HashMap<String, String>();
         usersIDAndBio = new HashMap<String, String>();
@@ -301,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                             song.setNumberOfListens(Integer.valueOf(document.getString("numberOfListens")));
                             //song.setSongPath(document.get);
                             Log.d("pesma", song.toString());
+                            song.setSongID(document.getId());
 
                             allSongs.add(song);
                         }

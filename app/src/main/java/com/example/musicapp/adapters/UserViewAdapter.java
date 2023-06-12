@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicapp.R;
@@ -17,18 +19,22 @@ import java.util.ArrayList;
 
 public class UserViewAdapter extends RecyclerView.Adapter<UserViewHolder> {
     private ArrayList<User> usersList;
+    FragmentManager fragmentManager;
     MainActivity activity;
+    Fragment allUsersViewFragment;
 
-    public UserViewAdapter(ArrayList<User> usersList, MainActivity activity) {
+    public UserViewAdapter(ArrayList<User> usersList, MainActivity activity, Fragment allUsersViewFragment) {
         this.usersList = usersList;
         this.activity = activity;
+        this.fragmentManager = fragmentManager;
+        this.allUsersViewFragment = allUsersViewFragment;
     }
 
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.users_view_user_item, parent, false);
-        return new UserViewHolder(view, activity);
+        return new UserViewHolder(view, activity, allUsersViewFragment);
     }
 
     @Override

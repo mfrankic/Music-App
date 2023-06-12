@@ -74,6 +74,13 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         PopupMenu popup = new PopupMenu(context, v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.song_menu, popup.getMenu());
+        if(artistID.equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+            MenuItem editItem = popup.getMenu().findItem(R.id.edit_song);
+            editItem.setVisible(true);
+        }else {
+            MenuItem editItem = popup.getMenu().findItem(R.id.edit_song);
+            editItem.setVisible(false);
+        }
         popup.setOnMenuItemClickListener(this);
         popup.show();
 
@@ -93,6 +100,17 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                 activity.getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.main_fragment_container, activity.artistViewFragment)
+                        .commit();
+                return true;
+            case R.id.edit_song:
+                for(Song song: DataSingleton.getDataSingleton().getAllSongs()){
+                    if(song.getSongFileUUID().equals(songFileUUID)){
+                        activity.editSongFragment.song = song;
+                    }
+                }
+                activity.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_fragment_container, activity.editSongFragment)
                         .commit();
                 return true;
             default:

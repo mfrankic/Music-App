@@ -20,6 +20,7 @@ import com.example.musicapp.adapters.PlaylistCreateViewAdapter;
 import com.example.musicapp.R;
 import com.example.musicapp.entities.DataSingleton;
 import com.example.musicapp.entities.Playlist;
+import com.example.musicapp.entities.User;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -104,6 +105,21 @@ public class PlaylistCreateFragment extends Fragment {
             // Clear tmp array for playlist creation
             DataSingleton.getDataSingleton().playlistCreateSongs = new ArrayList<>();
 
+
+
+
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("creator", DataSingleton.getDataSingleton().getCurrentUserID());
+            eventData.put("type", "playlistCreation");
+            eventData.put("description", DataSingleton.getDataSingleton().getCurrentUserName() + " created " + playlist.getPlaylistName() + " playlist");
+
+            UUID uuidEvent = UUID.randomUUID();
+            String uuidEventString = uuidEvent.toString();
+            CollectionReference events = db.collection("events");
+            events.document(uuidEventString).set(eventData).addOnSuccessListener(aVoid -> {
+                Toast.makeText(getContext(), "Event Created", Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e -> Log.w("TAG", "Error writing event", e));
+            activity.getCurrentUserData();
             // Refresh backend data
             activity.getAllBackendData();
 

@@ -18,7 +18,7 @@ public class DataSingleton {
     private static String currentUserName, currentUserID, currentUserBio;
     private static ArrayList<User> allUsers;
     private static ArrayList<String> currentUserFollowingIDs, currentUserFollowersIDs;
-
+    private static ArrayList<UserActivityEvent> allEvents;
     public  ArrayList<User> getAllUsers() {
         return allUsers;
     }
@@ -155,6 +155,23 @@ public class DataSingleton {
 
     public  void setCurrentUserFollowersIDs(ArrayList<String> currentUserFollowersIDs) {
         DataSingleton.currentUserFollowersIDs = currentUserFollowersIDs;
+    }
+
+    public  ArrayList<UserActivityEvent> getAllEvents() {
+        return allEvents;
+    }
+
+    public  void setAllEvents(ArrayList<UserActivityEvent> allEvents) {
+        DataSingleton.allEvents = allEvents;
+    }
+
+    public User getUserByID(String ID){
+        for(User user: allUsers){
+            if(user.getUserID().equals(ID)){
+                return user;
+            }
+        }
+        return null;
     }
 }
 

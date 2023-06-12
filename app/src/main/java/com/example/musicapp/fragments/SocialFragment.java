@@ -1,6 +1,7 @@
 package com.example.musicapp.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.musicapp.R;
 import com.example.musicapp.activities.MainActivity;
 
+import com.example.musicapp.adapters.ActivityEventAdapter;
 import com.example.musicapp.entities.DataSingleton;
-import com.example.musicapp.entities.UsersActivities;
+import com.example.musicapp.entities.UserActivityEvent;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.ArrayList;
@@ -23,9 +25,10 @@ import java.util.ArrayList;
 public class SocialFragment extends Fragment {
 
     private RecyclerView activityFeedView;
-    private ArrayList<UsersActivities> activityFeed;
+    private ArrayList<UserActivityEvent> activityFeed;
     private LinearLayoutManager activityFeedManager;
     public Fragment calledFromFragment;
+    private ActivityEventAdapter activityFeedAdapter;
     //private ActivityFeedAdapter activityFeedAdapter;
 
     public SocialFragment(){}
@@ -68,18 +71,21 @@ public class SocialFragment extends Fragment {
         getActivityFeed();
 
         // Set up the RecyclerView
-        /*
-        activityFeedView = view.findViewById(R.id.recyclerview_activity_feed);
-        activityFeedManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-        activityFeedView.setLayoutManager(activityFeedManager);
-        activityFeedAdapter = new ActivityFeedAdapter(getContext(), activityFeed);
-        activityFeedView.setAdapter(activityFeedAdapter);
 
-         */
+        if(activityFeed!= null) {
+            activityFeedView = view.findViewById(R.id.recyclerview_activity_feed);
+
+            activityFeedManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+            activityFeedView.setLayoutManager(activityFeedManager);
+            activityFeedAdapter = new ActivityEventAdapter(activityFeed, getContext());
+            activityFeedView.setAdapter(activityFeedAdapter);
+        }
+
     }
 
     private void getActivityFeed() {
-        //activityFeed = DataSingleton.getDataSingleton().getAllActivities();
+        activityFeed = DataSingleton.getDataSingleton().getAllEvents();
+
     }
 
     public Fragment getCalledFromFragment() {
