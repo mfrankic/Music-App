@@ -184,9 +184,12 @@ public class UserViewFragment extends Fragment {
     private void getFollowInfo(){
         isUserFollowed = false;
         ArrayList<String> currUserFollowing = DataSingleton.getDataSingleton().getCurrentUserFollowingIDs();
-        for(String follow: currUserFollowing){
-            if(follow.equals(user.getUserID())){
-                isUserFollowed = true;
+        if(currUserFollowing != null){
+
+            for(String follow: currUserFollowing){
+                if(follow.equals(user.getUserID())){
+                    isUserFollowed = true;
+                }
             }
         }
     }
