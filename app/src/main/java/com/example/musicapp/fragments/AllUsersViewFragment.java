@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,6 +28,7 @@ public class AllUsersViewFragment extends Fragment {
     private RecyclerView usersRecyclerView;
     private UserViewAdapter usersAdapter;
     private ArrayList<User> usersList;
+    public FragmentManager fragmentManager;
     MainActivity activity;
 
 
@@ -46,6 +48,8 @@ public class AllUsersViewFragment extends Fragment {
         activity = (MainActivity) getActivity();
         assert activity != null;
 
+        fragmentManager = getChildFragmentManager();
+
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> activity.getSupportFragmentManager()
                 .beginTransaction()
@@ -56,7 +60,7 @@ public class AllUsersViewFragment extends Fragment {
         usersList = new ArrayList<>();
         getAllUsers();
         usersRecyclerView = view.findViewById(R.id.recyclerview_all_users);
-        usersAdapter = new UserViewAdapter(usersList, activity);
+        usersAdapter = new UserViewAdapter(usersList, activity, this);
         usersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         usersRecyclerView.setAdapter(usersAdapter);
 
@@ -65,6 +69,11 @@ public class AllUsersViewFragment extends Fragment {
 
     public void getAllUsers(){
         usersList = new ArrayList<>();
-        usersList = DataSingleton.getDataSingleton().getAllUsers();
+        ArrayList<User> usersListTmp = DataSingleton.getDataSingleton().getAllUsers();
+        for(User user: usersListTmp){
+            if(!user.isArtist()){
+                usersList.add(user);
+            }
+        }
     }
 }

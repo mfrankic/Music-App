@@ -17,7 +17,8 @@ public class DataSingleton {
     private static int numOfFetchedURLs;
     private static String currentUserName, currentUserID, currentUserBio;
     private static ArrayList<User> allUsers;
-
+    private static ArrayList<String> currentUserFollowingIDs, currentUserFollowersIDs;
+    private static ArrayList<UserActivityEvent> allEvents;
     public  ArrayList<User> getAllUsers() {
         return allUsers;
     }
@@ -137,6 +138,40 @@ public class DataSingleton {
 
     public  void setAllPlaylists(ArrayList<Playlist> playlists) {
         DataSingleton.allPlaylists = playlists;
+    }
+
+
+    public  ArrayList<String> getCurrentUserFollowingIDs() {
+        return currentUserFollowingIDs;
+    }
+
+    public  void setCurrentUserFollowingIDs(ArrayList<String> currentUserFollowingIDs) {
+        DataSingleton.currentUserFollowingIDs = currentUserFollowingIDs;
+    }
+
+    public  ArrayList<String> getCurrentUserFollowersIDs() {
+        return currentUserFollowersIDs;
+    }
+
+    public  void setCurrentUserFollowersIDs(ArrayList<String> currentUserFollowersIDs) {
+        DataSingleton.currentUserFollowersIDs = currentUserFollowersIDs;
+    }
+
+    public  ArrayList<UserActivityEvent> getAllEvents() {
+        return allEvents;
+    }
+
+    public  void setAllEvents(ArrayList<UserActivityEvent> allEvents) {
+        DataSingleton.allEvents = allEvents;
+    }
+
+    public User getUserByID(String ID){
+        for(User user: allUsers){
+            if(user.getUserID().equals(ID)){
+                return user;
+            }
+        }
+        return null;
     }
 }
 

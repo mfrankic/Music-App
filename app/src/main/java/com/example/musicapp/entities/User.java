@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class User {
 
     private String userName, userBio, userID;
+    private ArrayList<String> followingIDs, followersIDs;
     private ArrayList<Playlist> playlists;
     private boolean isArtist;
 
@@ -49,5 +50,21 @@ public class User {
 
     public void setPlaylists(ArrayList<Playlist> playlists) {
         this.playlists = playlists;
+    }
+
+    public ArrayList<String> getFollowingIDs() {
+        return followingIDs;
+    }
+
+    public void setFollowingIDs(ArrayList<String> followingIDs) {
+        this.followingIDs = followingIDs;
+    }
+
+    public ArrayList<String> getFollowersIDs() {
+        return followersIDs;
+    }
+
+    public void setFollowersIDs(ArrayList<String> followersIDs) {
+        this.followersIDs = followersIDs;
     }
 }

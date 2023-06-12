@@ -69,7 +69,15 @@
                 android:text="Bio"
                 android:textSize="18sp"
                 android:layout_gravity="center"></TextView>
-
+            <TextView
+                android:id="@+id/user_profile_follow_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fadingEdge="horizontal|vertical"
+                android:fontFamily="sans-serif-medium"
+                android:text="Bio"
+                android:textSize="18sp"
+                android:layout_gravity="center"></TextView>
             <!-- Follow Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/follow_button"

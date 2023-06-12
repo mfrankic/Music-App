@@ -307,7 +307,25 @@ public class UploadSongFragment extends Fragment {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                 Log.d("TAG", "Upload successful");
                 Toast.makeText(getContext(), "Song uploaded successfully", Toast.LENGTH_SHORT).show();
-                activity.getAllBackendData();
+
+                // EVENT
+                Map<String, Object> eventData = new HashMap<>();
+                eventData.put("creator", DataSingleton.getDataSingleton().getCurrentUserID());
+                eventData.put("type", "upload");
+                eventData.put("description", DataSingleton.getDataSingleton().getCurrentUserName() + " uploaded " + songName.getText().toString() + " song");
+
+                UUID uuidEvent = UUID.randomUUID();
+                String uuidEventString = uuidEvent.toString();
+                CollectionReference events = db.collection("events");
+                events.document(uuidEventString).set(eventData).addOnSuccessListener(aVoid -> {
+                    // Refresh backend data
+                    activity.getCurrentUserData();
+                    activity.getAllBackendData();
+
+
+                    Toast.makeText(getContext(), "Event Created", Toast.LENGTH_SHORT).show();
+                }).addOnFailureListener(e -> Log.w("TAG", "Error writing event", e));
+
                 updateAlbumSpinner();
                 resetFields();
             });

@@ -36,6 +36,15 @@
                 android:orientation="horizontal"
                 android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar">
 
+                <!-- Button for creating a new playlist -->
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/create_playlist_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/notifications"
+                    android:src="@drawable/ic_plus" />
+
                 <!-- Notification button -->
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/notification_button"
@@ -45,9 +54,9 @@
                     android:contentDescription="@string/notifications"
                     android:src="@drawable/ic_notification_bell" />
 
-                <!-- Recently played button -->
+                <!-- Social played button -->
                 <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/recently_played_button"
+                    android:id="@+id/social_button"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"

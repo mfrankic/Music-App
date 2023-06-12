@@ -81,8 +81,10 @@ public class HomeFragment extends Fragment {
 
         AppCompatImageButton socialButton = view.findViewById(R.id.social_button);
         socialButton.setOnClickListener(v -> {
+            activity.socialFragment.setCalledFromFragment(activity.homeFragment);
             activity.getSupportFragmentManager()
                     .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
                     .replace(R.id.main_fragment_container, activity.socialFragment)
                     .addToBackStack("settings")
                     .commit();
@@ -90,17 +92,28 @@ public class HomeFragment extends Fragment {
         });
 
         AppCompatImageButton settingsButton = view.findViewById(R.id.settings_button);
-        settingsButton.setOnClickListener(v -> activity.getSupportFragmentManager()
+        settingsButton.setOnClickListener(v -> {
+
+            activity.settingsFragment.setCalledFromFragment(activity.homeFragment);
+                    activity.getSupportFragmentManager()
                 .beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(R.id.main_fragment_container, activity.settingsFragment)
                 .addToBackStack("settings")
-                .commit());
+                .commit();
+            }
+        );
 
         AppCompatImageButton createPlaylistButton = view.findViewById(R.id.create_playlist_button);
-        createPlaylistButton.setOnClickListener(v -> activity.getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_fragment_container, activity.playlistCreateFragment)
-                .commit());
+        createPlaylistButton.setOnClickListener(v ->
+        {
+            activity.playlistCreateFragment.setCalledFromFragment(activity.homeFragment);
+            activity.getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.main_fragment_container, activity.playlistCreateFragment)
+                    .commit();
+        });
 
 
         List<CarouselItem> items = new ArrayList<>();

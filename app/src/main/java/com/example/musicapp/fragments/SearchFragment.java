@@ -133,10 +133,40 @@ public class SearchFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         AppCompatImageButton settingsButton = view.findViewById(R.id.settings_button);
-        settingsButton.setOnClickListener(v -> activity.getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_fragment_container, activity.settingsFragment)
-                .commit());
+        settingsButton.setOnClickListener(v -> {
+
+                    activity.settingsFragment.setCalledFromFragment(activity.searchFragment);
+                    activity.getSupportFragmentManager()
+                            .beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
+                            .replace(R.id.main_fragment_container, activity.settingsFragment)
+                            .addToBackStack("settings")
+                            .commit();
+                }
+        );
+
+        AppCompatImageButton socialButton = view.findViewById(R.id.social_button);
+        socialButton.setOnClickListener(v -> {
+            activity.socialFragment.setCalledFromFragment(activity.searchFragment);
+            activity.getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.main_fragment_container, activity.socialFragment)
+                    .addToBackStack("settings")
+                    .commit();
+            System.out.println("Recently played button clicked");
+        });
+
+        AppCompatImageButton createPlaylistButton = view.findViewById(R.id.create_playlist_button);
+        createPlaylistButton.setOnClickListener(v ->
+        {
+            activity.playlistCreateFragment.setCalledFromFragment(activity.searchFragment);
+            activity.getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.main_fragment_container, activity.playlistCreateFragment)
+                    .commit();
+        });
 
         TextView greeting = view.findViewById(R.id.greeting_message);
         greeting.setText("Hello " + DataSingleton.getDataSingleton().getCurrentUserName());

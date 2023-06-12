@@ -20,6 +20,7 @@ import com.example.musicapp.adapters.PlaylistCreateViewAdapter;
 import com.example.musicapp.R;
 import com.example.musicapp.entities.DataSingleton;
 import com.example.musicapp.entities.Playlist;
+import com.example.musicapp.entities.User;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,6 +41,8 @@ public class PlaylistCreateFragment extends Fragment {
     private EditText playlistName;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CheckBox privateCheckbox;
+
+    public Fragment calledFromFragment;
     public PlaylistCreateFragment() {
         // Required empty public constructor
     }
@@ -65,7 +68,7 @@ public class PlaylistCreateFragment extends Fragment {
         MaterialToolbar toolbar = view.findViewById(R.id.fragment_create_playlist_top_bar);
         toolbar.setNavigationOnClickListener(v -> activity.getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.main_fragment_container, activity.homeFragment)
+                .replace(R.id.main_fragment_container, calledFromFragment)
                 .commit());
 
         privateCheckbox = view.findViewById(R.id.private_checkbox);
@@ -102,6 +105,21 @@ public class PlaylistCreateFragment extends Fragment {
             // Clear tmp array for playlist creation
             DataSingleton.getDataSingleton().playlistCreateSongs = new ArrayList<>();
 
+
+
+
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("creator", DataSingleton.getDataSingleton().getCurrentUserID());
+            eventData.put("type", "playlistCreation");
+            eventData.put("description", DataSingleton.getDataSingleton().getCurrentUserName() + " created " + playlist.getPlaylistName() + " playlist");
+
+            UUID uuidEvent = UUID.randomUUID();
+            String uuidEventString = uuidEvent.toString();
+            CollectionReference events = db.collection("events");
+            events.document(uuidEventString).set(eventData).addOnSuccessListener(aVoid -> {
+                Toast.makeText(getContext(), "Event Created", Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e -> Log.w("TAG", "Error writing event", e));
+            activity.getCurrentUserData();
             // Refresh backend data
             activity.getAllBackendData();
 
@@ -117,5 +135,13 @@ public class PlaylistCreateFragment extends Fragment {
 
         DataSingleton.getDataSingleton().playlistCreateSongs = new ArrayList<>();
 
+    }
+
+    public Fragment getCalledFromFragment() {
+        return calledFromFragment;
+    }
+
+    public void setCalledFromFragment(Fragment calledFromFragment) {
+        this.calledFromFragment = calledFromFragment;
     }
 }
