@@ -45,14 +45,7 @@
                     android:contentDescription="@string/notifications"
                     android:src="@drawable/ic_plus" />
 
-                <!-- Notification button -->
-                <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/notification_button"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/notifications"
-                    android:src="@drawable/ic_notification_bell" />
+
 
                 <!-- Social played button -->
                 <androidx.appcompat.widget.AppCompatImageButton

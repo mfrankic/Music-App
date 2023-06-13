@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicapp.R;
+import com.example.musicapp.activities.MainActivity;
 import com.example.musicapp.entities.Playlist;
 import com.example.musicapp.entities.Song;
 import com.example.musicapp.views.ArtistViewSongsViewHolder;
@@ -19,16 +20,17 @@ public class UserViewPlaylistAdapter extends RecyclerView.Adapter<UserViewPlayli
 
     Context context;
     List<Playlist> items;
+    MainActivity activity;
 
-    public UserViewPlaylistAdapter(Context context, List<Playlist> items) {
+    public UserViewPlaylistAdapter(Context context, List<Playlist> items, MainActivity activity) {
         this.context = context;
         this.items = items;
-        //this.activity = activity;
+        this.activity = activity;
     }
     @NonNull
     @Override
     public UserViewPlaylistHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new UserViewPlaylistHolder(LayoutInflater.from(context).inflate(R.layout.user_view_playlist_item, parent, false), context);
+        return new UserViewPlaylistHolder(LayoutInflater.from(context).inflate(R.layout.user_view_playlist_item, parent, false), context, activity);
     }
 
     @Override

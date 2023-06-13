@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicapp.activities.MainActivity;
 import com.example.musicapp.views.ArtistViewSongsViewHolder;
 import com.example.musicapp.R;
 import com.example.musicapp.entities.Song;
@@ -18,18 +19,18 @@ public class ArtistViewSongsAdapter extends RecyclerView.Adapter<ArtistViewSongs
     Context context;
 
     List<Song> items;
-    //MainActivity activity;
+    MainActivity activity;
 
-    public ArtistViewSongsAdapter(Context context, List<Song> items) {
+    public ArtistViewSongsAdapter(Context context, List<Song> items, MainActivity activity) {
         this.context = context;
         this.items = items;
-        //this.activity = activity;
+        this.activity = activity;
     }
 
     @NonNull
     @Override
     public ArtistViewSongsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ArtistViewSongsViewHolder(LayoutInflater.from(context).inflate(R.layout.artist_view_songs_item, parent, false), context);
+        return new ArtistViewSongsViewHolder(LayoutInflater.from(context).inflate(R.layout.artist_view_songs_item, parent, false), context, activity);
     }
 
     @Override

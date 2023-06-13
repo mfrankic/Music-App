@@ -20,6 +20,8 @@ import com.google.android.material.textview.MaterialTextView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -70,11 +72,7 @@ public class HomeFragment extends Fragment {
         MaterialTextView greetingTextView = view.findViewById(R.id.greeting_message);
         greetingTextView.setText(greeting);
 
-        AppCompatImageButton notificationButton = view.findViewById(R.id.notification_button);
-        notificationButton.setOnClickListener(v -> {
-            // handle notification button click
-            System.out.println("Notification button clicked");
-        });
+
 
         AppCompatImageButton socialButton = view.findViewById(R.id.social_button);
         socialButton.setOnClickListener(v -> {
@@ -135,7 +133,20 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager recommendedLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         recommendedRecyclerView.setLayoutManager(recommendedLayoutManager);
 
-        CarouselAdapter recommendedAdapter = new CarouselAdapter(activity, items);
+
+        //Sort items by number of listens
+        List<CarouselItem> itemsRecomend = new ArrayList<>();
+
+        for(CarouselItem item: items){
+            itemsRecomend.add(item);
+        }
+        Collections.sort(itemsRecomend, new Comparator<CarouselItem>() {
+            @Override
+            public int compare(CarouselItem item1, CarouselItem item2) {
+                return Integer.compare(item2.getSong().getNumberOfListens(), item1.getSong().getNumberOfListens());
+            }
+        });
+        CarouselAdapter recommendedAdapter = new CarouselAdapter(activity, itemsRecomend);
         recommendedRecyclerView.setAdapter(recommendedAdapter);
 
 

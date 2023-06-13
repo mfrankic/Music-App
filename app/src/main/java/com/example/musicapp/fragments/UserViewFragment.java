@@ -46,6 +46,7 @@ public class UserViewFragment extends Fragment {
     public UserViewFragment(){}
     boolean isUserFollowed;
     Button followBtn;
+    MainActivity activity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,7 +65,7 @@ public class UserViewFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        MainActivity activity = (MainActivity) getActivity();
+         activity = (MainActivity) getActivity();
         assert activity != null;
 
         MaterialToolbar toolbar = view.findViewById(R.id.artist_profile_top_bar);
@@ -92,7 +93,7 @@ public class UserViewFragment extends Fragment {
         playlistView = view.findViewById(R.id.users_playlists_recycler_view);
         playlistManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         playlistView.setLayoutManager(playlistManager);
-        playlistAdapter = new UserViewPlaylistAdapter(getContext(), playlists);
+        playlistAdapter = new UserViewPlaylistAdapter(getContext(), playlists, activity);
         playlistView.setAdapter(playlistAdapter);
 
         followBtn.setOnClickListener(v -> {
@@ -176,7 +177,7 @@ public class UserViewFragment extends Fragment {
                 break;
             }
         }
-        playlistAdapter = new UserViewPlaylistAdapter(getContext(), user.getPlaylists());
+        playlistAdapter = new UserViewPlaylistAdapter(getContext(), user.getPlaylists(), activity);
         name.setText(user.getUserName());
         bio.setText(user.getUserBio());
     }

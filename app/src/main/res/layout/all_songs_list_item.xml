@@ -21,18 +21,19 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:textAppearanceMedium"
             android:text="Subtitle" />
+        <TextView
+            android:id="@+id/library_song_view_num_of_plays"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Number of plays: "
+            android:textSize="18dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@id/content_layout"
+            android:layout_alignBottom="@id/content_layout" />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/library_song_view_num_of_likes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Number of likes: "
-        android:textSize="18dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/content_layout"
-        android:layout_alignBottom="@id/content_layout" />
+
 
 </RelativeLayout>

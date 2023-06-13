@@ -7,11 +7,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -40,8 +43,10 @@ import com.example.musicapp.fragments.SocialFragment;
 import com.example.musicapp.fragments.UploadSongFragment;
 import com.example.musicapp.fragments.UserViewFragment;
 import com.example.musicapp.services.MusicPlayerService;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -95,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     private MediaControllerCompat mediaController;
     private Handler loadDataHandler = new Handler();
 
+    public TextView songNameView, artistNameView;
 
     public MediaBrowserCompat getMediaBrowser() {
         return mediaBrowser;
@@ -117,6 +123,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         findViewById(R.id.song_name).setSelected(true);
         findViewById(R.id.artist_name).setSelected(true);
+
+        songNameView = findViewById(R.id.song_name);
+        artistNameView = findViewById(R.id.artist_name);
 
         mediaBrowser = new MediaBrowserCompat(this,
                 new ComponentName(this, MusicPlayerService.class),
@@ -214,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 public void onConnected() {
                     MediaSessionCompat.Token token = mediaBrowser.getSessionToken();
                     mediaController = new MediaControllerCompat(MainActivity.this, token);
+                    mediaController.registerCallback(controllerCallback);
                     MediaControllerCompat.setMediaController(MainActivity.this, mediaController);
                 }
 
@@ -471,22 +481,15 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         getPlaylists();
 
                     }
-                    Log.d("URLgetzika", String.valueOf(song.getSongPath()));
-                    Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
-                    numOfURLsFetched += 1;
-                    if (numOfURLsFetched == allSongs.size()) {
-                        DataSingleton.getDataSingleton().setAllSongs(allSongs);
-                        getPlaylists();
-                        Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
-                    }
-                    Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
+
 
                 }).addOnFailureListener(e -> {
                     numOfURLsFetched += 1;
                     if (numOfURLsFetched == allSongs.size()) {
                         DataSingleton.getDataSingleton().setAllSongs(allSongs);
                         getPlaylists();
-                        Toast.makeText(MainActivity.this, "Data load finished", Toast.LENGTH_SHORT).show();
+                        Log.d("finishss", "getsongsURL");
+                        //Toast.makeText(MainActivity.this, "Data load finished", Toast.LENGTH_SHORT).show();
                         libraryFragment.dataUpdate();
                     }
                     e.printStackTrace();
@@ -560,6 +563,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         }
         DataSingleton.getDataSingleton().setAllUsers(allUsers);
 
+        Log.d("finishss", "updateuserswithplaylists");
         Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
     }
 
@@ -658,4 +662,24 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         }
 
     }
+
+    private final MediaControllerCompat.Callback controllerCallback =
+            new MediaControllerCompat.Callback() {
+                @Override
+                public void onPlaybackStateChanged(PlaybackStateCompat state) {
+
+                }
+
+                @Override
+                public void onMetadataChanged(MediaMetadataCompat metadata) {
+                    // Handle change in metadata,
+                    // e.g. use metadata.getDescription().getTitle() and update your UI accordingly
+                    String songTitle = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
+                    String songArtist = metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST);
+
+                    songNameView.setText(songTitle);
+                    artistNameView.setText(songArtist);
+                }
+
+            };
 }

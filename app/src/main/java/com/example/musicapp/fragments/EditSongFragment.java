@@ -82,7 +82,10 @@ public class EditSongFragment extends Fragment {
 
         ArrayList<String> allAlbumNames = new ArrayList<>();
         for(Album album: DataSingleton.getDataSingleton().getAllAlbums()){
-            allAlbumNames.add(album.getAlbumName());
+            if(album.getArtistID().equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+
+                allAlbumNames.add(album.getAlbumName());
+            }
         }
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, allAlbumNames);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -110,7 +113,9 @@ public class EditSongFragment extends Fragment {
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-
+                                    Toast.makeText(activity, "Song updated", Toast.LENGTH_SHORT).show();
+                                    activity.getCurrentUserData();
+                                    activity.getAllBackendData();
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
