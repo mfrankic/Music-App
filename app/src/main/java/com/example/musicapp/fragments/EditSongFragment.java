@@ -83,8 +83,10 @@ public class EditSongFragment extends Fragment {
         ArrayList<String> allAlbumNames = new ArrayList<>();
         for(Album album: DataSingleton.getDataSingleton().getAllAlbums()){
             if(album.getArtistID().equals(DataSingleton.getDataSingleton().getCurrentUserID())){
+                if(!allAlbumNames.contains(album.getAlbumName())){
+                    allAlbumNames.add(album.getAlbumName());
+                }
 
-                allAlbumNames.add(album.getAlbumName());
             }
         }
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, allAlbumNames);
