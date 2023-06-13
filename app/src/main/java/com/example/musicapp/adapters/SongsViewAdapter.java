@@ -40,9 +40,10 @@ public class SongsViewAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         holder.songName.setText(items.get(position).getSongName());
         holder.artistName.setText(items.get(position).getArtistName());
         Log.d("adapter", String.valueOf(items.get(position).getNumberOfLikes()));
-        holder.numberOfLikes.setText("Number of likes: " + String.valueOf(items.get(position).getNumberOfLikes()));
+        //holder.numberOfLikes.setText("Number of likes: " + String.valueOf(items.get(position).getNumberOfLikes()));
         holder.setSongFileUUID(items.get(position).getSongFileUUID());
         holder.setArtistID(items.get(position).getArtistID());
+        holder.numberOfPlays.setText("Number of plays: " + String.valueOf(items.get(position).getNumberOfListens()));
     }
 
     @Override

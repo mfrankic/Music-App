@@ -471,22 +471,15 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         getPlaylists();
 
                     }
-                    Log.d("URLgetzika", String.valueOf(song.getSongPath()));
-                    Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
-                    numOfURLsFetched += 1;
-                    if (numOfURLsFetched == allSongs.size()) {
-                        DataSingleton.getDataSingleton().setAllSongs(allSongs);
-                        getPlaylists();
-                        Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
-                    }
-                    Log.d("URLgetzika", String.valueOf(numOfURLsFetched) + " " + String.valueOf(allSongs.size()));
+
 
                 }).addOnFailureListener(e -> {
                     numOfURLsFetched += 1;
                     if (numOfURLsFetched == allSongs.size()) {
                         DataSingleton.getDataSingleton().setAllSongs(allSongs);
                         getPlaylists();
-                        Toast.makeText(MainActivity.this, "Data load finished", Toast.LENGTH_SHORT).show();
+                        Log.d("finishss", "getsongsURL");
+                        //Toast.makeText(MainActivity.this, "Data load finished", Toast.LENGTH_SHORT).show();
                         libraryFragment.dataUpdate();
                     }
                     e.printStackTrace();
@@ -560,6 +553,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         }
         DataSingleton.getDataSingleton().setAllUsers(allUsers);
 
+        Log.d("finishss", "updateuserswithplaylists");
         Toast.makeText(MainActivity.this, "Backend data refresh finished", Toast.LENGTH_SHORT).show();
     }
 
