@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 public class Song implements Parcelable {
 
-    private String songName, artistName, songFileUUID, genre, artistID, albumUUDI, albumName, songPath, artistBio;
+    private String songName, artistName, songFileUUID, genre, artistID, albumUUDI, albumName, songPath, artistBio, songID;
     private Timestamp releaseDate;
     private int numberOfLikes, numberOfListens;
 
@@ -161,6 +161,14 @@ public class Song implements Parcelable {
 
     public void setNumberOfListens(int numberOfListens) {
         this.numberOfListens = numberOfListens;
+    }
+
+    public String getSongID() {
+        return songID;
+    }
+
+    public void setSongID(String songID) {
+        this.songID = songID;
     }
 
     @Override

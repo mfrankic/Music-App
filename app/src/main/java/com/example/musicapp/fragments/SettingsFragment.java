@@ -28,6 +28,7 @@ public class SettingsFragment extends Fragment {
     public SwitchMaterial artistSwitch;
     protected FirebaseAuth auth;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    public Fragment calledFromFragment;
 
 
     public SettingsFragment() {
@@ -55,7 +56,8 @@ public class SettingsFragment extends Fragment {
         MaterialToolbar toolbar = view.findViewById(R.id.top_bar);
         toolbar.setNavigationOnClickListener(v -> activity.getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.main_fragment_container, activity.homeFragment)
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
+                .replace(R.id.main_fragment_container, calledFromFragment)
                 .commit());
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
@@ -135,5 +137,13 @@ public class SettingsFragment extends Fragment {
         });
 
 
+    }
+
+    public Fragment getCalledFromFragment() {
+        return calledFromFragment;
+    }
+
+    public void setCalledFromFragment(Fragment calledFromFragment) {
+        this.calledFromFragment = calledFromFragment;
     }
 }
