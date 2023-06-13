@@ -3,55 +3,46 @@ package com.example.musicapp.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.musicapp.entities.CarouselItem;
 import com.example.musicapp.R;
+import com.example.musicapp.activities.MainActivity;
+import com.example.musicapp.entities.CarouselItem;
+import com.example.musicapp.views.CarouselViewHolder;
 
 import java.util.List;
 
-public class CarouselAdapter extends RecyclerView.Adapter<CarouselAdapter.ViewHolder> {
+public class CarouselAdapter extends RecyclerView.Adapter<CarouselViewHolder> {
+    private final MainActivity activity;
 
     private final List<CarouselItem> items;
 
-    public CarouselAdapter(List<CarouselItem> items) {
+    public CarouselAdapter(MainActivity activity, List<CarouselItem> items) {
+        this.activity = activity;
         this.items = items;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public CarouselViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.carousel_item, parent, false);
-        return new ViewHolder(view);
+        return new CarouselViewHolder(activity, view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(CarouselViewHolder holder, int position) {
         CarouselItem item = items.get(position);
         holder.imageView.setImageResource(item.getImageResId());
-        holder.textView.setText(item.getText());
+        holder.textView.setText(item.getSong().getSongName());
+        holder.song = item.getSong();
     }
 
     @Override
     public int getItemCount() {
         return items.size();
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-
-        public ImageView imageView;
-        public TextView textView;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-            imageView = itemView.findViewById(R.id.image_view);
-            textView = itemView.findViewById(R.id.text_view);
-        }
     }
 }
 

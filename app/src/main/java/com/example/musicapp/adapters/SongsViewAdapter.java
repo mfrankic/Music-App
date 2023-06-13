@@ -9,9 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicapp.R;
+import com.example.musicapp.activities.MainActivity;
 import com.example.musicapp.entities.Song;
 import com.example.musicapp.views.SongsViewHolder;
-import com.example.musicapp.activities.MainActivity;
 
 import java.util.List;
 
@@ -47,6 +47,9 @@ public class SongsViewAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     @Override
     public int getItemCount() {
+        if (items == null) {
+            return 0;
+        }
         return items.size();
     }
 }

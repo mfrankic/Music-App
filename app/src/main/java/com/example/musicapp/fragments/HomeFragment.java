@@ -1,7 +1,6 @@
 package com.example.musicapp.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,8 +48,6 @@ public class HomeFragment extends Fragment {
         if (getArguments() != null) {
             allSongs = getArguments().getParcelableArrayList("allSongs");
         }
-
-        Log.d("HomeFragment", "onViewCreated: " + allSongs.toString());
 
         MainActivity activity = (MainActivity) getActivity();
         assert activity != null;
@@ -119,7 +116,7 @@ public class HomeFragment extends Fragment {
         List<CarouselItem> items = new ArrayList<>();
 
         for (Song song : allSongs) {
-            items.add(new CarouselItem(R.drawable.playlist_image, song.getSongName()));
+            items.add(new CarouselItem(R.drawable.playlist_image, song));
         }
 
 //        items.add(new CarouselItem(R.drawable.playlist_image, "Album 1"));
@@ -138,7 +135,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager recommendedLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         recommendedRecyclerView.setLayoutManager(recommendedLayoutManager);
 
-        CarouselAdapter recommendedAdapter = new CarouselAdapter(items);
+        CarouselAdapter recommendedAdapter = new CarouselAdapter(activity, items);
         recommendedRecyclerView.setAdapter(recommendedAdapter);
 
 
@@ -146,7 +143,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager recentlyPlayedLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         recentlyPlayedRecyclerView.setLayoutManager(recentlyPlayedLayoutManager);
 
-        CarouselAdapter recentlyPlayedAdapter = new CarouselAdapter(items);
+        CarouselAdapter recentlyPlayedAdapter = new CarouselAdapter(activity, items);
         recentlyPlayedRecyclerView.setAdapter(recentlyPlayedAdapter);
 
 
@@ -154,7 +151,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager popularLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         popularRecyclerView.setLayoutManager(popularLayoutManager);
 
-        CarouselAdapter popularAdapter = new CarouselAdapter(items);
+        CarouselAdapter popularAdapter = new CarouselAdapter(activity, items);
         popularRecyclerView.setAdapter(popularAdapter);
 
 
@@ -162,7 +159,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager featuredLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         featuredRecyclerView.setLayoutManager(featuredLayoutManager);
 
-        CarouselAdapter featuredAdapter = new CarouselAdapter(items);
+        CarouselAdapter featuredAdapter = new CarouselAdapter(activity, items);
         featuredRecyclerView.setAdapter(featuredAdapter);
     }
 }
