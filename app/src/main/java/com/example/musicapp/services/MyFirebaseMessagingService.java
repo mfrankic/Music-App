@@ -34,6 +34,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Log.d("MyFirebaseMsgService", "From: " + remoteMessage.getFrom());
 
         if (remoteMessage.getNotification() != null) {
+            Log.d("MyFirebaseMsgService", "Message Notification Data: " + remoteMessage.getNotification());
             showNotification(remoteMessage.getNotification().getTitle(), remoteMessage.getNotification().getBody());
         }
 
