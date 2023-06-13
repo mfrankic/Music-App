@@ -360,9 +360,6 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                         song.setSongID(document.getId());
 
                         allSongs.add(song);
-
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelableArrayList("allSongs", allSongs);
                     }
                 } else {
                     Log.d("allSongs", "Error getting documents: ", task.getException());
