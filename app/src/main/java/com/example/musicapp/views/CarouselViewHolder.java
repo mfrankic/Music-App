@@ -1,11 +1,12 @@
 package com.example.musicapp.views;
 
-import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -40,10 +41,7 @@ public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.
         textView = itemView.findViewById(R.id.text_view);
         itemView.setOnClickListener(this);
         itemView.setOnLongClickListener(this);
-        mediaBrowser = new MediaBrowserCompat(activity,
-                new ComponentName(activity, MusicPlayerService.class),
-                connectionCallbacks,
-                null);
+        mediaBrowser = activity.getMediaBrowser();
     }
 
     @Override
@@ -51,8 +49,9 @@ public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.
         // send song to MusicPlayerService
         MaterialCardView musicPlayerBar = activity.findViewById(R.id.music_player_bar);
         musicPlayerBar.setVisibility(View.VISIBLE);
+        mediaController = MediaControllerCompat.getMediaController(activity);
+        Log.d("CarouselViewHolder", "onClick: " + mediaController);
         initializeData();
-        mediaBrowser.connect();
     }
 
     @Override
@@ -65,34 +64,12 @@ public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.
         return false;
     }
 
-    private final MediaBrowserCompat.ConnectionCallback connectionCallbacks =
-            new MediaBrowserCompat.ConnectionCallback() {
-                @Override
-                public void onConnected() {
-                    // Get the token for the MediaSession
-                    MediaSessionCompat.Token token = mediaBrowser.getSessionToken();
-                    mediaController = new MediaControllerCompat(activity.getBaseContext(), token);
-                    MediaControllerCompat.setMediaController(activity, mediaController);
-                    mediaController.getTransportControls().play();
-                }
-
-                @Override
-                public void onConnectionSuspended() {
-                    // The Service has crashed. Disable transport controls until it automatically reconnects
-                }
-
-                @Override
-                public void onConnectionFailed() {
-                    // The Service has refused our connection
-                }
-            };
-
     private void initializeData() {
         ArrayList<Song> songList = new ArrayList<>();
         songList.add(song);
 
         Intent startServiceIntent = new Intent(activity, MusicPlayerService.class);
-        startServiceIntent.putExtra("songList", songList);
+//        startServiceIntent.putExtra("songList", songList);
 
         Bundle songBundle = new Bundle();
         songBundle.putParcelableArrayList("songList", songList);
@@ -104,5 +81,24 @@ public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.
         });
 
         activity.startService(startServiceIntent);
+
+//        handler.post(skipToNext);
     }
+
+    // skip to next runnable
+    private Handler handler = new Handler();
+    private Runnable skipToNext = new Runnable() {
+        @Override
+        public void run() {
+            if (mediaController != null) {
+                if (mediaController.getPlaybackState().getState() != PlaybackStateCompat.STATE_NONE) {
+                    mediaController.getTransportControls().skipToNext();
+                } else {
+                    mediaController.getTransportControls().play();
+                }
+            } else {
+                handler.postDelayed(skipToNext, 100);
+            }
+        }
+    };
 }

@@ -1,10 +1,14 @@
 package com.example.musicapp.activities;
 
 import android.app.ActivityOptions;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,6 +37,7 @@ import com.example.musicapp.fragments.SettingsFragment;
 import com.example.musicapp.fragments.SocialFragment;
 import com.example.musicapp.fragments.UploadSongFragment;
 import com.example.musicapp.fragments.UserViewFragment;
+import com.example.musicapp.services.MusicPlayerService;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -83,8 +88,14 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     private Map<String, String> usersIDAndBio;
     boolean userIDsFetchfinished, songsFetchFinished, albumsFetchFinished;
     private int numOfSongsFetched, numOfURLsFetched;
+    private MediaBrowserCompat mediaBrowser;
+    private MediaControllerCompat mediaController;
     private Handler loadDataHandler = new Handler();
 
+
+    public MediaBrowserCompat getMediaBrowser() {
+        return mediaBrowser;
+    }
 
     private SharedPreferences.OnSharedPreferenceChangeListener sharedPrefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
@@ -103,6 +114,12 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         findViewById(R.id.song_name).setSelected(true);
         findViewById(R.id.artist_name).setSelected(true);
+
+        mediaBrowser = new MediaBrowserCompat(this,
+                new ComponentName(this, MusicPlayerService.class),
+                connectionCallbacks,
+                null);
+        mediaBrowser.connect();
 
         // open music player when clicked on music player bar
         MaterialCardView musicPlayerBar = findViewById(R.id.music_player_bar);
@@ -187,6 +204,26 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             isArtistChange();
         }
     }
+
+    private final MediaBrowserCompat.ConnectionCallback connectionCallbacks =
+            new MediaBrowserCompat.ConnectionCallback() {
+                @Override
+                public void onConnected() {
+                    MediaSessionCompat.Token token = mediaBrowser.getSessionToken();
+                    mediaController = new MediaControllerCompat(MainActivity.this, token);
+                    MediaControllerCompat.setMediaController(MainActivity.this, mediaController);
+                }
+
+                @Override
+                public void onConnectionSuspended() {
+                    // The Service has crashed. Disable transport controls until it automatically reconnects
+                }
+
+                @Override
+                public void onConnectionFailed() {
+                    // The Service has refused our connection
+                }
+            };
 
 
     private void getCurrentUserData() {

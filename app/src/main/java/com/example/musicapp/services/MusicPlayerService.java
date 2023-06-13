@@ -42,15 +42,15 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private static final String NOTIFICATION_CHANNEL_ID = "music_player_channel";
     private static final int REQUEST_CODE = 100;
     private MediaPlayer mediaPlayer;
-    private ArrayList<Song> songList; // list of song file URLs or paths
-    private int mCurrentSongIndex; // index of the currently playing song
+    private ArrayList<Song> songList = new ArrayList<>(); // list of song file URLs or paths
+    public static int mCurrentSongIndex = 0; // index of the currently playing song
     private MediaSessionCompat mediaSession;
     private MediaMetadataCompat.Builder metadataBuilder;
     private PlaybackStateCompat.Builder stateBuilder;
     private MediaControllerCompat mediaController;
 
     private List<MediaBrowserCompat.MediaItem> mediaItems = new ArrayList<>();
-    private boolean mediaItemsAreReady = false;
+    public static boolean mediaItemsAreReady = false;
     private boolean isBuffering = false;
     private int lastMediaState = PlaybackStateCompat.STATE_NONE;
 
@@ -63,7 +63,6 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     @Override
     public void onCreate() {
         super.onCreate();
-        isRunning = true;
 
         // create channel for notification
         NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "Music Player Service", NotificationManager.IMPORTANCE_DEFAULT);
@@ -168,54 +167,10 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        KeyEvent mediaKeyEvent = MediaButtonReceiver.handleIntent(mediaSession, intent);
-        // get the song list from intent
-        if (intent == null) {
-            return START_NOT_STICKY;
-        }
+        isRunning = true;
+        MediaButtonReceiver.handleIntent(mediaSession, intent);
 
-        if (mediaKeyEvent != null) {
-            // handle media key events
-            if (mediaKeyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-                if (mediaKeyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_NEXT) {
-                    skipToNext();
-                }
-                if (mediaKeyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_PREVIOUS) {
-                    skipToPrevious();
-                }
-            }
-
-            return START_NOT_STICKY;
-        }
-
-        songList = intent.getParcelableArrayListExtra("songList");
-        mCurrentSongIndex = intent.getIntExtra("songIndex", 0);
-
-        mediaController = new MediaControllerCompat(MusicPlayerService.this, mediaSession.getSessionToken());
-
-        if (mediaItemsAreReady) {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setAudioAttributes(
-                    new AudioAttributes.Builder()
-                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
-                            .build()
-            );
-            try {
-                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex).getSongPath()));
-                mediaPlayer.prepareAsync();
-                Log.d("MusicPlayerService", "onStartCommand: " + mediaItems);
-                mediaPlayer.setOnPreparedListener(mp -> {
-                    metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration())
-                            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, (String) mediaItems.get(mCurrentSongIndex).getDescription().getTitle())
-                            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, (String) mediaItems.get(mCurrentSongIndex).getDescription().getSubtitle());
-                    mediaSession.setMetadata(metadataBuilder.build());
-                });
-                mediaPlayer.setOnCompletionListener(mp -> skipToNext());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        mediaController = new MediaControllerCompat(this, mediaSession.getSessionToken());
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -254,22 +209,32 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     @Override
     public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result, @NonNull Bundle options) {
         ArrayList<Song> songListIn = options.getParcelableArrayList("songList");
-        // If the media item information is ready, you can call sendResult() immediately.
-        if (mediaItemsAreReady) {
-            result.sendResult(mediaItems);
-        } else {
-            result.detach();
-            // Load media items and call sendResult() when ready.
-            loadMediaItems(result, songListIn);
-        }
+        result.detach();
+        // Load media items and call sendResult() when ready.
+        loadMediaItems(result, songListIn);
     }
 
     // Dummy method for media items loading. You should implement actual logic.
     private void loadMediaItems(Result<List<MediaBrowserCompat.MediaItem>> result, ArrayList<Song> songListIn) {
         // Check if the song list is available and not empty
         if (songListIn != null && !songListIn.isEmpty()) {
+            mediaItemsAreReady = false;
+
+            if (mediaPlayer != null) {
+                stop();
+            }
+
+            if (songList.isEmpty()) {
+                songList.addAll(0, songListIn);
+            } else {
+                songList.addAll(mCurrentSongIndex + 1, songListIn);
+            }
             // Initialize the media items list
-            mediaItems = new ArrayList<>();
+            if (mediaItems == null) {
+                mediaItems = new ArrayList<>();
+            }
+
+            ArrayList<MediaBrowserCompat.MediaItem> tempMediaItems = new ArrayList<>();
 
             for (Song song : songListIn) {
                 MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
@@ -284,12 +249,24 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                         MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
 
                 // Add the media item to the list
-                mediaItems.add(mediaItem);
-
+                tempMediaItems.add(mediaItem);
             }
 
-            // Indicate that the media items are ready
+            if (mediaItems.isEmpty()) {
+                mediaItems.addAll(tempMediaItems);
+            } else {
+                mediaItems.addAll(mCurrentSongIndex + 1, tempMediaItems);
+
+                mCurrentSongIndex++;
+            }
+
             mediaItemsAreReady = true;
+
+            if (mediaController == null) {
+                mediaController = new MediaControllerCompat(this, mediaSession.getSessionToken());
+            }
+            play();
+
             // Send the result to the connected MediaBrowser
             result.sendResult(mediaItems);
         } else {
@@ -308,13 +285,14 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                             .build()
             );
             try {
-                mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(mCurrentSongIndex).getSongPath()));
+                mediaPlayer.setDataSource(this, Uri.parse(songList.get(mCurrentSongIndex).getSongPath()));
                 mediaPlayer.prepareAsync();
                 mediaPlayer.setOnPreparedListener(mp -> {
                     metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration())
                             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, (String) mediaItems.get(mCurrentSongIndex).getDescription().getTitle())
                             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, (String) mediaItems.get(mCurrentSongIndex).getDescription().getSubtitle());
                     mediaSession.setMetadata(metadataBuilder.build());
+                    mediaSession.setActive(true);
                     mediaPlayer.start();
                     updatePlaybackState(PlaybackStateCompat.ACTION_PLAY);
                 });
@@ -322,10 +300,7 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
                 e.printStackTrace();
             }
 
-            mediaPlayer.setOnCompletionListener(mp -> {
-                // handle completion of a track
-                skipToNext();
-            });
+            mediaPlayer.setOnCompletionListener(mp -> skipToNext());
 
         } else if (pbStateCompat.getState() == PlaybackStateCompat.STATE_PAUSED || pbStateCompat.getState() == PlaybackStateCompat.STATE_NONE) {
             mediaPlayer.start();
@@ -350,14 +325,15 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
     private void stop() {
         if (mediaPlayer != null) {
             clearMediaPlayer();
+            mediaSession.setActive(false);
             updatePlaybackState(PlaybackStateCompat.ACTION_STOP);
         }
     }
 
     private void skipToNext() {
         if (mediaPlayer != null && songList != null && mCurrentSongIndex < songList.size() - 1) {
-            mCurrentSongIndex++;
             clearMediaPlayer();
+            mCurrentSongIndex++;
             play();
             updatePlaybackState(PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
         }
@@ -365,8 +341,9 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
 
     private void skipToPrevious() {
         if (mediaPlayer != null && mCurrentSongIndex > 0) {
-            mCurrentSongIndex--;
+            Log.d("TAG1", "skipToPrevious: " + mCurrentSongIndex);
             clearMediaPlayer();
+            mCurrentSongIndex--;
             play();
             updatePlaybackState(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
         }
@@ -427,13 +404,6 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
         return PendingIntent.getActivity(this, REQUEST_CODE, openUI, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private PendingIntent closeIntent() {
-        Intent closeIntent = new Intent(this, MusicPlayerService.class);
-        closeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        closeIntent.putExtra("destroyCode", 666);
-        return PendingIntent.getService(this, 0, closeIntent, PendingIntent.FLAG_IMMUTABLE);
-    }
-
     private void updatePlaybackState(long action) {
         if (action == PlaybackStateCompat.ACTION_PLAY) {
             stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, mediaPlayer.getCurrentPosition(), 1, SystemClock.elapsedRealtime());
@@ -462,8 +432,6 @@ public class MusicPlayerService extends MediaBrowserServiceCompat {
             }
         }
         mediaSession.setPlaybackState(stateBuilder.build());
-
-        Log.d("TAG", "updatePlaybackState: " + action);
 
         if (action != PlaybackStateCompat.ACTION_STOP) {
             // Now that the state is updated, notify the service to become active
