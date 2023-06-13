@@ -57,6 +57,7 @@ public class ArtistViewFragment extends Fragment {
     FirebaseStorage storage;
     private StorageReference storageRef;
     private boolean isArtistFollowed;
+    MainActivity activity;
     public ArtistViewFragment() {
     }
 
@@ -85,7 +86,7 @@ public class ArtistViewFragment extends Fragment {
         Log.d("artistLife", "onViewCreated");
         super.onViewCreated(view, savedInstanceState);
 
-        MainActivity activity = (MainActivity) getActivity();
+        activity = (MainActivity) getActivity();
         assert activity != null;
 
         MaterialToolbar toolbar = view.findViewById(R.id.artist_profile_top_bar);
@@ -122,13 +123,13 @@ public class ArtistViewFragment extends Fragment {
         songsView = view.findViewById(R.id.artist_songs_recycler_view);
         songsViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         songsView.setLayoutManager(songsViewManager);
-        songsViewAdapter = new ArtistViewSongsAdapter(getContext(), songs);
+        songsViewAdapter = new ArtistViewSongsAdapter(getContext(), songs, activity);
         songsView.setAdapter(songsViewAdapter);
 
         albumsView = view.findViewById(R.id.artist_albums_recycler_view);
         albumViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         albumsView.setLayoutManager(albumViewManager);
-        albumViewAdapter = new ArtistViewAlbumsAdapter(getContext(), albums);
+        albumViewAdapter = new ArtistViewAlbumsAdapter(getContext(), albums, activity);
         albumsView.setAdapter(albumViewAdapter);
 
 
@@ -257,8 +258,8 @@ public class ArtistViewFragment extends Fragment {
             getSongsAndAlbums();
             name.setText(artistName);
             bio.setText(artistBio);
-            albumViewAdapter = new ArtistViewAlbumsAdapter(getContext(), albums);
-            songsViewAdapter = new ArtistViewSongsAdapter(getContext(), songs);
+            albumViewAdapter = new ArtistViewAlbumsAdapter(getContext(), albums, activity);
+            songsViewAdapter = new ArtistViewSongsAdapter(getContext(), songs, activity);
 
         }else {
             Log.d("artistAllusers", "name == null");

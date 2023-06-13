@@ -12,18 +12,29 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicapp.R;
 import com.example.musicapp.activities.MainActivity;
+import com.example.musicapp.entities.Album;
+import com.example.musicapp.entities.DataSingleton;
 import com.example.musicapp.entities.Song;
 import com.example.musicapp.services.MusicPlayerService;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener {
 
@@ -33,6 +44,8 @@ public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.
     private MainActivity activity;
     private MediaBrowserCompat mediaBrowser;
     private MediaControllerCompat mediaController;
+    FirebaseFirestore db;
+    boolean eventCreated = false;
 
     public CarouselViewHolder(MainActivity activity, View itemView) {
         super(itemView);
@@ -42,6 +55,7 @@ public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.
         itemView.setOnClickListener(this);
         itemView.setOnLongClickListener(this);
         mediaBrowser = activity.getMediaBrowser();
+         db = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -52,6 +66,8 @@ public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.
         mediaController = MediaControllerCompat.getMediaController(activity);
         Log.d("CarouselViewHolder", "onClick: " + mediaController);
         initializeData();
+        crateEvent();
+        updateNumOfListens();
     }
 
     @Override
@@ -101,4 +117,45 @@ public class CarouselViewHolder extends RecyclerView.ViewHolder implements View.
             }
         }
     };
+
+    private void updateNumOfListens(){
+        DocumentReference docRef = db.collection("users/" + song.getArtistID()+"/songs").document(song.getSongID());
+
+        String numOfListens = String.valueOf(song.getNumberOfListens() + 1);
+
+        song.setNumberOfListens((int) song.getNumberOfListens() + 1);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("numberOfListens", numOfListens);
+        docRef.update(updates)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        activity.getCurrentUserData();
+                        activity.getAllBackendData();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+    }
+
+    private void crateEvent(){
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("creator", DataSingleton.getDataSingleton().getCurrentUserID());
+        eventData.put("type", "songPlay");
+        eventData.put("description", DataSingleton.getDataSingleton().getCurrentUserName() + " played " + song.getSongName() + " song");
+
+        UUID uuidEvent = UUID.randomUUID();
+        String uuidEventString = uuidEvent.toString();
+        CollectionReference events = db.collection("events");
+        events.document(uuidEventString).set(eventData).addOnSuccessListener(aVoid -> {
+            eventCreated = true;
+
+
+            Toast.makeText(activity, "Event Created", Toast.LENGTH_SHORT).show();
+        }).addOnFailureListener(e -> Log.w("TAG", "Error writing event", e));
+    }
 }

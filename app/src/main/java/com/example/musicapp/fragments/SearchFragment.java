@@ -57,7 +57,7 @@ public class SearchFragment extends Fragment {
     }
 
     private void setAllSearchViewAdapter(ArrayList<SearchElement> searchElements) {
-        searchViewAdapter = new SearchViewAdapter(getContext(), searchElements);
+        searchViewAdapter = new SearchViewAdapter(getContext(), searchElements, activity);
         allSearchView.setAdapter(searchViewAdapter);
     }
 

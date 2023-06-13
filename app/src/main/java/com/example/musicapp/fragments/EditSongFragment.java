@@ -110,7 +110,9 @@ public class EditSongFragment extends Fragment {
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-
+                                    Toast.makeText(activity, "Song updated", Toast.LENGTH_SHORT).show();
+                                    activity.getCurrentUserData();
+                                    activity.getAllBackendData();
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
