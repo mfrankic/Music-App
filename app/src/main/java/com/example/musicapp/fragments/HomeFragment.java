@@ -72,11 +72,7 @@ public class HomeFragment extends Fragment {
         MaterialTextView greetingTextView = view.findViewById(R.id.greeting_message);
         greetingTextView.setText(greeting);
 
-        AppCompatImageButton notificationButton = view.findViewById(R.id.notification_button);
-        notificationButton.setOnClickListener(v -> {
-            // handle notification button click
-            System.out.println("Notification button clicked");
-        });
+
 
         AppCompatImageButton socialButton = view.findViewById(R.id.social_button);
         socialButton.setOnClickListener(v -> {

@@ -81,17 +81,6 @@
 
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                style="@style/Widget.Material3.Button.IconButton"
-                android:id="@+id/play_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:backgroundTint="@android:color/transparent"
-                android:contentDescription="@string/play"
-                android:padding="0dp"
-                app:icon="@drawable/ic_play"
-                app:iconSize="38dp"
-                app:iconTint="@color/white" />
 
             <com.google.android.material.button.MaterialButton
                 style="@style/Widget.Material3.Button.IconButton"
